@@ -205,18 +205,6 @@ CREATE TABLE client_contacts (
 CREATE INDEX idx_client_contacts_client ON client_contacts(client_id);
 CREATE UNIQUE INDEX uq_client_contacts_email ON client_contacts(client_id, email) WHERE email IS NOT NULL;
 
-CREATE TABLE client_interactions (
-  id          TEXT PRIMARY KEY,
-  client_id   TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
-  project_id  TEXT REFERENCES projects(id) ON DELETE SET NULL,
-  kind        TEXT NOT NULL CHECK (kind IN ('meeting','call','email','note','requirement')),
-  subject     TEXT NOT NULL,
-  body        TEXT NOT NULL DEFAULT '',
-  occurred_at TEXT NOT NULL,
-  created_by  TEXT REFERENCES users(id),
-  created_at  TEXT NOT NULL
-);
-CREATE INDEX idx_client_interactions_client ON client_interactions(client_id, occurred_at);
 
 -- ───────────────────────────── Projects ─────────────────────────────
 
@@ -319,6 +307,20 @@ CREATE TABLE milestone_dependencies (
   PRIMARY KEY (milestone_id, depends_on_id),
   CHECK (milestone_id <> depends_on_id)
 );
+
+-- Client relationship history (defined after projects so exports restore in dependency order).
+CREATE TABLE client_interactions (
+  id          TEXT PRIMARY KEY,
+  client_id   TEXT NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  project_id  TEXT REFERENCES projects(id) ON DELETE SET NULL,
+  kind        TEXT NOT NULL CHECK (kind IN ('meeting','call','email','note','requirement')),
+  subject     TEXT NOT NULL,
+  body        TEXT NOT NULL DEFAULT '',
+  occurred_at TEXT NOT NULL,
+  created_by  TEXT REFERENCES users(id),
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX idx_client_interactions_client ON client_interactions(client_id, occurred_at);
 
 -- ───────────────────────────── Tasks ─────────────────────────────
 

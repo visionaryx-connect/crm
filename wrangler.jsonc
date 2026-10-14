@@ -37,4 +37,25 @@
   // Secrets (set with `wrangler secret put`, or .dev.vars locally):
   //   SESSION_SECRET  – 32+ random bytes, HMAC key for CSRF/download signatures
   //   DATA_KEY        – 32 random bytes (base64), AES-GCM key for MFA secrets at rest
+  ,
+  // ───── Deployed environments. Build with CLOUDFLARE_ENV=<name> npm run build, then `npx wrangler deploy`.
+  // Bindings are not inherited between environments, so each one declares its own resources.
+  "env": {
+    "staging": {
+      "vars": { "APP_ENV": "staging", "APP_ORIGIN": "https://ops-staging.visionary-x.in", "COMPANY_TIMEZONE": "Asia/Kolkata" },
+      "routes": [{ "pattern": "ops-staging.visionary-x.in", "custom_domain": true }],
+      "d1_databases": [{ "binding": "DB", "database_name": "visionaryx-ops-staging", "database_id": "REPLACE_WITH_STAGING_D1_ID", "migrations_dir": "migrations" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "visionaryx-ops-files-staging" }],
+      "durable_objects": { "bindings": [{ "name": "REALTIME", "class_name": "RealtimeHub" }] },
+      "triggers": { "crons": ["30 2 * * *"] }
+    },
+    "production": {
+      "vars": { "APP_ENV": "production", "APP_ORIGIN": "https://ops.visionary-x.in", "COMPANY_TIMEZONE": "Asia/Kolkata" },
+      "routes": [{ "pattern": "ops.visionary-x.in", "custom_domain": true }],
+      "d1_databases": [{ "binding": "DB", "database_name": "visionaryx-ops", "database_id": "REPLACE_WITH_PRODUCTION_D1_ID", "migrations_dir": "migrations" }],
+      "r2_buckets": [{ "binding": "FILES", "bucket_name": "visionaryx-ops-files" }],
+      "durable_objects": { "bindings": [{ "name": "REALTIME", "class_name": "RealtimeHub" }] },
+      "triggers": { "crons": ["30 2 * * *"] }
+    }
+  }
 }

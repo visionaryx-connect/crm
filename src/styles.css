@@ -1,0 +1,126 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/instrument-sans/index.css';
+@import '@fontsource-variable/fraunces/index.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
+
+/* ───────────── Visionary X design tokens ─────────────
+   Porcelain ivory ground, graphite ink, deep forest green as the single action colour, muted champagne
+   gold for emphasis and wayfinding. Status colours appear only where they carry meaning. */
+@theme {
+  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-ivory: #f6f3eb;
+  --color-paper: #fcfbf7;
+  --color-porcelain: #efebe0;
+  --color-sage: #e3e9e1;
+  --color-sage-deep: #c9d5c8;
+  --color-line: #e1dccf;
+  --color-line-strong: #cfc8b7;
+
+  --color-ink: #22262a;
+  --color-ink-2: #464b4f;
+  --color-muted: #767a74;
+  --color-faint: #a3a59d;
+
+  --color-forest: #1f4d3a;
+  --color-forest-700: #173b2c;
+  --color-forest-600: #275e47;
+  --color-forest-100: #dfe9e2;
+  --color-forest-50: #eef4ef;
+
+  --color-gold: #b39556;
+  --color-gold-700: #8a7038;
+  --color-gold-100: #f1e9d6;
+
+  --color-ok: #2f7a4e;
+  --color-ok-bg: #e5f1e8;
+  --color-warn: #a86a12;
+  --color-warn-bg: #f8ecd6;
+  --color-danger: #b0412e;
+  --color-danger-bg: #f6e2dd;
+  --color-info: #376a88;
+  --color-info-bg: #e2ecf2;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  --shadow-pop: 0 1px 2px rgb(34 38 42 / 0.06), 0 8px 24px -6px rgb(34 38 42 / 0.16);
+  --shadow-soft: 0 1px 2px rgb(34 38 42 / 0.05);
+
+  --animate-fade-in: fade-in 140ms ease-out;
+  --animate-rise: rise 180ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  --animate-shimmer: shimmer 1.4s linear infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-ivory text-ink font-sans text-[14px] leading-[1.5];
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  ::selection {
+    background: var(--color-gold-100);
+  }
+  dialog::backdrop {
+    background: rgb(23 32 28 / 0.38);
+    backdrop-filter: blur(1px);
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-gold-700;
+  }
+  .rule {
+    @apply border-line;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--color-porcelain) 0%, #f7f4ec 50%, var(--color-porcelain) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-sm;
+  }
+  .link {
+    @apply text-forest underline decoration-forest/30 underline-offset-2 hover:decoration-forest;
+  }
+}
+
+/* Print: reports become clean A4 documents. */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  body { background: white; font-size: 11px; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  main { padding: 0 !important; }
+  table { page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+}
+.print-only { display: none; }

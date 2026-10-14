@@ -1,0 +1,40 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "visionaryx-ops",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  // Static SPA assets are served by Workers Static Assets. /api/* and /ws/* always hit the Worker first.
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/ws/*"]
+  },
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "visionaryx-ops",
+      // Replace with the id printed by `wrangler d1 create visionaryx-ops` before the first remote deploy.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // R2 is optional. Remove this block if R2 is not enabled on the account; uploads are then disabled gracefully.
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "visionaryx-ops-files" }],
+  "durable_objects": {
+    "bindings": [{ "name": "REALTIME", "class_name": "RealtimeHub" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RealtimeHub"] }],
+  "triggers": {
+    // 02:30 UTC = 08:00 IST: deadline reminders, overdue detection, monthly snapshot on the 1st.
+    "crons": ["30 2 * * *"]
+  },
+  "vars": {
+    "APP_ENV": "development",
+    "APP_ORIGIN": "http://localhost:5173",
+    "COMPANY_TIMEZONE": "Asia/Kolkata"
+  }
+  // Secrets (set with `wrangler secret put`, or .dev.vars locally):
+  //   SESSION_SECRET  – 32+ random bytes, HMAC key for CSRF/download signatures
+  //   DATA_KEY        – 32 random bytes (base64), AES-GCM key for MFA secrets at rest
+}

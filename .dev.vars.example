@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local development. Never commit real values.
+SESSION_SECRET=dev-only-session-secret-change-me-0123456789abcdef
+# 32 random bytes, base64. Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+DATA_KEY=REPLACE_WITH_BASE64_32_BYTES

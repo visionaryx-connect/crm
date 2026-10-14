@@ -1,0 +1,11 @@
+// Test-only Worker config (no static assets, no cron). Mirrors bindings in wrangler.jsonc.
+{
+  "name": "visionaryx-ops-test",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [{ "binding": "DB", "database_name": "visionaryx-ops-test", "database_id": "00000000-0000-0000-0000-000000000001", "migrations_dir": "migrations" }],
+  "r2_buckets": [{ "binding": "FILES", "bucket_name": "visionaryx-ops-files-test" }],
+  "durable_objects": { "bindings": [{ "name": "REALTIME", "class_name": "RealtimeHub" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["RealtimeHub"] }]
+}

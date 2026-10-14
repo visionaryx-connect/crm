@@ -4,7 +4,7 @@
 // *.test email addresses, so sample data can never be mistaken for company records. NEVER run against production.
 //
 // Sign-in for all sample accounts uses SEED_PASSWORD below (override with the env var of the same name).
-// Super Admin / Admin / HR roles must enrol in two-factor authentication at first sign-in.
+// Two-factor authentication is optional (enable it under Account, or require it per role in Users & roles).
 
 import { pbkdf2Sync, randomBytes } from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'

@@ -77,23 +77,31 @@ describe('authentication and sessions', () => {
     expect((await call(agent, 'POST', '/api/notifications/read', { all: true })).status).toBe(200)
   })
 
-  it('forces MFA enrolment for administrator roles before any access', async () => {
+  it('admins sign in without MFA by default', async () => {
     const u = await createUser('admin')
+    const r = await call({ cookie: '', csrf: '' }, 'POST', '/api/auth/login', { email: u.email, password: PASSWORD })
+    expect(r.json.mfa).toBeNull()
+  })
+
+  it('forces MFA enrolment when a role is configured to require it', async () => {
+    await env.DB.prepare(`UPDATE roles SET requires_mfa = 1 WHERE key = 'hr_manager'`).run()
+    const u = await createUser('hr_manager')
     const agent: Agent = { cookie: '', csrf: '' }
     const r = await call(agent, 'POST', '/api/auth/login', { email: u.email, password: PASSWORD })
     expect(r.json.mfa).toBe('enrol')
     agent.csrf = r.json.csrfToken
-    const blocked = await call(agent, 'GET', '/api/clients')
+    const blocked = await call(agent, 'GET', '/api/team/members')
     expect(blocked.status).toBe(403)
     expect(blocked.json.error.code).toBe('MFA_ENROLMENT_REQUIRED')
     // Once enrolled, the next login requires a code.
     const full = await login(u.email)
-    expect((await call(full, 'GET', '/api/clients')).status).toBe(200)
+    expect((await call(full, 'GET', '/api/team/members')).status).toBe(200)
     const again: Agent = { cookie: '', csrf: '' }
     const second = await call(again, 'POST', '/api/auth/login', { email: u.email, password: PASSWORD })
     expect(second.json.mfa).toBe('required')
     again.csrf = second.json.csrfToken
-    expect((await call(again, 'GET', '/api/clients')).json.error.code).toBe('MFA_REQUIRED')
+    expect((await call(again, 'GET', '/api/team/members')).json.error.code).toBe('MFA_REQUIRED')
+    await env.DB.prepare(`UPDATE roles SET requires_mfa = 0 WHERE key = 'hr_manager'`).run()
     expect((await call(again, 'POST', '/api/auth/mfa/verify', { code: '000000' })).status).toBe(401)
   })
 

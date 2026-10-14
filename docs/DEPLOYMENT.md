@@ -66,7 +66,7 @@ node scripts/bootstrap-admin.mjs --name "Founder Name" --email founder@visionary
 npx wrangler d1 execute visionaryx-ops --remote --env production --file bootstrap.sql && rm bootstrap.sql
 ```
 
-The command prints an activation link (valid 72 h). Open it, set a password, then enrol MFA at first sign-in.
+The command prints an activation link (valid 72 h). Open it and set a password. Two-factor authentication is optional; enabling it under Account is strongly recommended for the Super Admin.
 
 ## 4. Build and deploy
 
@@ -93,11 +93,11 @@ Either connect the repository in **Workers & Pages → your Worker → Settings 
 ## 7. Post-deploy checklist
 
 - `GET /api/health` returns `{ ok: true, env: "production", r2: true|false }`.
-- Sign in as the Super Admin, enrol MFA, store recovery codes offline.
+- Sign in as the Super Admin; enable MFA under Account (recommended) and store recovery codes offline.
 - Settings → Company: set support email/phone shown on the client portal.
 - Settings → Working days: confirm the weekly pattern and Saturday rule.
 - Settings → Holidays: import the current year's Government of India and Tamil Nadu lists and **verify** each against the official notification.
-- Invite staff; check that Admin/HR are prompted for MFA.
+- Invite staff. If you want MFA mandatory for a role, tick “Require two-factor authentication” on that role in Users & roles.
 - Run `scripts/backup.sh` once and a restore drill (see BACKUP_RECOVERY.md).
 
 ## Free-tier fit and costs

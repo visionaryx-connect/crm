@@ -63,7 +63,7 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     name: 'Super Admin',
     description: 'Founder-level access to every module, security setting and export.',
     rank: 0,
-    requiresMfa: true,
+    requiresMfa: false,
     permissions: ALL_PERMISSIONS,
   },
   {
@@ -71,7 +71,7 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     name: 'Admin',
     description: 'Runs day-to-day operations: clients, projects, teams and settings.',
     rank: 10,
-    requiresMfa: true,
+    requiresMfa: false,
     permissions: [
       ...everyone,
       'dashboard.company',
@@ -90,7 +90,7 @@ export const DEFAULT_ROLES: RoleDefinition[] = [
     name: 'HR Manager',
     description: 'Employee records, attendance, leave and HR reporting. No client material by default.',
     rank: 20,
-    requiresMfa: true,
+    requiresMfa: false,
     permissions: [
       ...everyone,
       'employees.read_sensitive', 'employees.manage', 'departments.manage',

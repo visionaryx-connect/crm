@@ -4,7 +4,7 @@ One platform for Visionary X's clients, projects, tasks, people, calendar, HR an
 
 | | |
 |---|---|
-| Internal workspace | `/` — staff only, session + RBAC (+ MFA for admin/HR roles) |
+| Internal workspace | `/` — staff only, session + RBAC (+ optional MFA) |
 | Client portal | `/portal/access#t=…` — passwordless, scoped, revocable links |
 | API | `/api/*` — REST, every request authorised server-side |
 | Live updates | `/ws/staff`, `/ws/portal` — authenticated WebSockets via a Durable Object |
@@ -29,7 +29,7 @@ npm run db:reset:local           # applies migrations + loads clearly-marked sam
 npm run dev                      # http://localhost:5173 (Vite + the Worker running in workerd)
 ```
 
-Sample accounts are listed when the seed runs; they all use `@sample.visionary-x.test` emails and the password defined as `SEED_PASSWORD` in [`scripts/seed.mjs`](scripts/seed.mjs). Super Admin, Admin and HR accounts must enrol an authenticator app at first sign-in (that is the real MFA flow). Every sample record carries `is_seed = 1` and shows a **Sample** tag in the UI.
+Sample accounts are listed when the seed runs; they all use `@sample.visionary-x.test` emails and the password defined as `SEED_PASSWORD` in [`scripts/seed.mjs`](scripts/seed.mjs). Two-factor authentication is optional: each user can turn it on under Account, and an administrator can require it for any role. Every sample record carries `is_seed = 1` and shows a **Sample** tag in the UI.
 
 Other commands:
 
@@ -51,7 +51,7 @@ scripts/backup.sh --local && scripts/restore-drill.sh "$(ls -t backups/*.sql | h
 
 ## What is implemented
 
-**Foundation** — D1 schema with 40+ normalised tables, FKs, indexes, CHECK constraints and versioned migrations; role/permission tables with a configurable matrix (6 system roles, custom roles); server-managed sessions (HttpOnly cookies, idle + absolute expiry, rotation on MFA); TOTP MFA with recovery codes (required for Super Admin, Admin, HR); CSRF tokens + Origin checks; login lockout and D1-backed rate limiting; activity/security/admin audit log; account activation and admin-verified password reset via one-time links; session listing and revocation.
+**Foundation** — D1 schema with 40+ normalised tables, FKs, indexes, CHECK constraints and versioned migrations; role/permission tables with a configurable matrix (6 system roles, custom roles); server-managed sessions (HttpOnly cookies, idle + absolute expiry, rotation on MFA); optional TOTP MFA with recovery codes (can be required per role); CSRF tokens + Origin checks; login lockout and D1-backed rate limiting; activity/security/admin audit log; account activation and admin-verified password reset via one-time links; session listing and revocation.
 
 **CRM** — clients with references, contacts, services, account managers, relationship history (meetings, calls, requirements, notes), duplicate detection, archive/restore, pending feedback and approvals, portal-link management.
 

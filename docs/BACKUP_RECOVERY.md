@@ -14,11 +14,11 @@
 D1 keeps a change history (7 days on the free plan, 30 days on paid). To inspect or restore:
 
 ```bash
-npx wrangler d1 time-travel info visionaryx-ops --env production
+npx wrangler d1 time-travel info visionaryx-ops --env production -c wrangler.jsonc
 ```
 
 ```bash
-npx wrangler d1 time-travel restore visionaryx-ops --env production --timestamp 2026-10-14T09:00:00+05:30
+npx wrangler d1 time-travel restore visionaryx-ops --env production -c wrangler.jsonc --timestamp 2026-10-14T09:00:00+05:30
 ```
 
 A restore replaces the whole database. Take an export first (below) so the restore itself can be undone, and announce a short maintenance window — writes made after the timestamp are lost.

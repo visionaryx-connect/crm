@@ -1,5 +1,7 @@
 # Deployment (Cloudflare)
 
+> **New to this?** Follow the numbered walkthrough in [DEPLOY_STEP_BY_STEP.md](DEPLOY_STEP_BY_STEP.md). This page is the reference version.
+
 The whole system is a single Worker that serves the built SPA as static assets, the `/api/*` REST API, the `/ws/*` WebSocket endpoints and a daily Cron Trigger. Bindings: D1 (`DB`), Durable Object (`REALTIME`), optional R2 (`FILES`).
 
 ## 1. One-time account setup
@@ -37,11 +39,11 @@ If you do not enable R2, delete the `r2_buckets` entries from the environments y
 Generate fresh values per environment — never reuse development values (see [ENVIRONMENT.md](ENVIRONMENT.md)):
 
 ```bash
-npx wrangler secret put SESSION_SECRET --env production
+npx wrangler secret put SESSION_SECRET --name visionaryx-ops-production
 ```
 
 ```bash
-npx wrangler secret put DATA_KEY --env production
+npx wrangler secret put DATA_KEY --name visionaryx-ops-production
 ```
 
 `DATA_KEY` encrypts MFA secrets at rest. **Losing it means every MFA user must be reset**; store it in the company password manager. Rotating it requires re-enrolment (no automatic re-encryption is implemented).
@@ -49,7 +51,7 @@ npx wrangler secret put DATA_KEY --env production
 ## 3. Database migrations
 
 ```bash
-npx wrangler d1 migrations apply visionaryx-ops --remote --env production
+npx wrangler d1 migrations apply visionaryx-ops --remote --env production -c wrangler.jsonc
 ```
 
 Never run `scripts/seed.mjs` against production. Create the first Super Admin with the bootstrap command below, then invite everyone else from **Users & roles**.
@@ -63,7 +65,7 @@ node scripts/bootstrap-admin.mjs --name "Founder Name" --email founder@visionary
 ```
 
 ```bash
-npx wrangler d1 execute visionaryx-ops --remote --env production --file bootstrap.sql && rm bootstrap.sql
+npx wrangler d1 execute visionaryx-ops --remote --env production -c wrangler.jsonc --file bootstrap.sql && rm bootstrap.sql
 ```
 
 The command prints an activation link (valid 72 h). Open it and set a password. Two-factor authentication is optional; enabling it under Account is strongly recommended for the Super Admin.

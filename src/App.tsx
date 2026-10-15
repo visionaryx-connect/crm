@@ -6,7 +6,7 @@ import { AuthGate, useAuth } from '@/lib/auth'
 import { RealtimeProvider } from '@/lib/realtime'
 import { ToastProvider } from '@/components/toast'
 import { AppShell } from '@/layout/AppShell'
-import { EmptyState, SkeletonRows } from '@/components/ui'
+import { BrandMark, EmptyState, SkeletonRows } from '@/components/ui'
 import { Lock } from 'lucide-react'
 
 const Login = lazy(() => import('@/pages/auth/Login'))
@@ -34,6 +34,7 @@ const Settings = lazy(() => import('@/pages/Settings'))
 const Users = lazy(() => import('@/pages/admin/Users'))
 const Audit = lazy(() => import('@/pages/admin/Audit'))
 const Account = lazy(() => import('@/pages/Account'))
+const Guide = lazy(() => import('@/pages/Guide'))
 const PortalAccess = lazy(() => import('@/pages/portal/PortalAccess'))
 const PortalApp = lazy(() => import('@/pages/portal/PortalApp'))
 
@@ -49,10 +50,10 @@ const queryClient = new QueryClient({
 
 function Splash() {
   return (
-    <div className="flex h-dvh items-center justify-center bg-ivory">
+    <div className="flex h-dvh items-center justify-center bg-canvas">
       <div className="flex items-center gap-3 text-muted">
-        <span className="flex size-8 animate-pulse items-center justify-center rounded-[5px] bg-forest font-display text-paper">X</span>
-        <span className="font-mono text-[11px] uppercase tracking-[0.18em]">Visionary X</span>
+        <BrandMark size={34} className="animate-pulse" />
+        <span className="text-[11px] font-medium uppercase tracking-[0.2em]">Visionary X</span>
       </div>
     </div>
   )
@@ -99,6 +100,7 @@ function Workspace() {
               <Route path="admin/users" element={<RequirePerm perms={['users.manage', 'roles.manage', 'security.manage']}><Users /></RequirePerm>} />
               <Route path="admin/audit" element={<RequirePerm perms={['audit.read', 'security.manage']}><Audit /></RequirePerm>} />
               <Route path="account" element={<Account />} />
+              <Route path="guide" element={<Guide />} />
               <Route path="access-denied" element={<EmptyState icon={<Lock className="size-7" />} title="Access denied" body="You don’t have permission to view that page." />} />
               <Route path="*" element={<EmptyState title="Page not found" body="Check the address, or use search (⌘K) to find what you need." />} />
             </Routes>

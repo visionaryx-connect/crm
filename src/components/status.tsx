@@ -3,18 +3,18 @@ import { DELIVERABLE_STATUS_LABEL, PROJECT_STATUS_LABEL, TASK_STATUS_LABEL, type
 import { Badge, cx, type Tone } from './ui'
 
 const projectTone: Record<ProjectStatus, Tone> = {
-  planning: 'neutral', not_started: 'neutral', in_progress: 'forest', on_hold: 'gold', at_risk: 'warn', delayed: 'danger', in_review: 'info', completed: 'ok', archived: 'outline',
+  planning: 'neutral', not_started: 'neutral', in_progress: 'accent', on_hold: 'highlight', at_risk: 'warn', delayed: 'danger', in_review: 'info', completed: 'ok', archived: 'outline',
 }
 export const ProjectStatusBadge = ({ status }: { status: string }) => <Badge tone={projectTone[status as ProjectStatus] ?? 'neutral'}>{PROJECT_STATUS_LABEL[status as ProjectStatus] ?? status}</Badge>
 
-const taskTone: Record<TaskStatus, Tone> = { backlog: 'outline', todo: 'neutral', in_progress: 'forest', in_review: 'info', blocked: 'danger', completed: 'ok', cancelled: 'outline' }
+const taskTone: Record<TaskStatus, Tone> = { backlog: 'outline', todo: 'neutral', in_progress: 'accent', in_review: 'info', blocked: 'danger', completed: 'ok', cancelled: 'outline' }
 export const TaskStatusBadge = ({ status }: { status: string }) => (
   <Badge tone={taskTone[status as TaskStatus] ?? 'neutral'} dot>
     {TASK_STATUS_LABEL[status as TaskStatus] ?? status}
   </Badge>
 )
 
-const delivTone: Record<DeliverableStatus, Tone> = { draft: 'neutral', in_review: 'info', approved: 'forest', shared: 'gold', client_approved: 'ok', changes_requested: 'warn' }
+const delivTone: Record<DeliverableStatus, Tone> = { draft: 'neutral', in_review: 'info', approved: 'accent', shared: 'highlight', client_approved: 'ok', changes_requested: 'warn' }
 export const DeliverableBadge = ({ status }: { status: string }) => <Badge tone={delivTone[status as DeliverableStatus] ?? 'neutral'}>{DELIVERABLE_STATUS_LABEL[status as DeliverableStatus] ?? status}</Badge>
 
 export function PriorityMark({ priority, withLabel }: { priority: string; withLabel?: boolean }) {
@@ -36,7 +36,7 @@ export function PriorityMark({ priority, withLabel }: { priority: string; withLa
 
 const healthMap = {
   on_track: { label: 'On track', cls: 'bg-ok', text: 'text-ok' },
-  watch: { label: 'Watch', cls: 'bg-gold', text: 'text-gold-700' },
+  watch: { label: 'Watch', cls: 'bg-highlight', text: 'text-highlight-ink' },
   at_risk: { label: 'At risk', cls: 'bg-warn', text: 'text-warn' },
   off_track: { label: 'Off track', cls: 'bg-danger', text: 'text-danger' },
   not_applicable: { label: '—', cls: 'bg-line-strong', text: 'text-muted' },
@@ -71,8 +71,8 @@ export function ProgressFigure({ value, hasData = true, compact }: { value: numb
   if (!hasData) return <span className="text-[12px] text-faint">No tasks yet</span>
   return (
     <div className={cx('flex items-center gap-2.5', compact ? 'w-28' : 'w-40')}>
-      <div className="h-1 flex-1 overflow-hidden rounded-full bg-sage" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} aria-label="Progress">
-        <div className="h-full rounded-full bg-forest" style={{ width: `${Math.min(100, value)}%` }} />
+      <div className="h-1 flex-1 overflow-hidden rounded-full bg-track" role="progressbar" aria-valuenow={value} aria-valuemin={0} aria-valuemax={100} aria-label="Progress">
+        <div className="h-full rounded-full bg-accent" style={{ width: `${Math.min(100, value)}%` }} />
       </div>
       <span className="w-10 text-right font-mono text-[12px] tabular text-ink-2">{Math.round(value)}%</span>
     </div>

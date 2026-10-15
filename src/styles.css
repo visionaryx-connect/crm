@@ -1,55 +1,62 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/instrument-sans/index.css';
-@import '@fontsource-variable/fraunces/index.css';
+@import '@fontsource-variable/inter/index.css';
+@import '@fontsource-variable/inter-tight/index.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
 
-/* ───────────── Visionary X design tokens ─────────────
-   Porcelain ivory ground, graphite ink, deep forest green as the single action colour, muted champagne
-   gold for emphasis and wayfinding. Status colours appear only where they carry meaning. */
+/* ───────────── Visionary X brand tokens ─────────────
+   Taken from visionary-x.in: carbon #0c0c0c ground, ivory #fbfaf7 ink, grey #cccaca secondary — a strictly
+   monochrome system. Headlines are bold, uppercase, tightly tracked grotesk (Neue Montreal on the site; Inter
+   Tight is the site's own declared fallback and is used here). Body text is Inter. Primary actions are ivory pills.
+   Colour appears only for status meaning. Tokens are role-based so the palette lives in this one file. */
 @theme {
-  --font-sans: 'Instrument Sans Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+  --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Neue Montreal', 'Inter Tight Variable', 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
 
-  --color-ivory: #f6f3eb;
-  --color-paper: #fcfbf7;
-  --color-porcelain: #efebe0;
-  --color-sage: #e3e9e1;
-  --color-sage-deep: #c9d5c8;
-  --color-line: #e1dccf;
-  --color-line-strong: #cfc8b7;
+  /* Surfaces */
+  --color-canvas: #0c0c0c;          /* page background (brand carbon) */
+  --color-surface: #141414;         /* panels, cards, inputs */
+  --color-subtle: #1b1b1b;          /* hover / subtle fills */
+  --color-track: #262626;           /* progress tracks, chips */
+  --color-track-strong: #333333;
+  --color-line: #232323;            /* hairlines (≈ ivory at 10%) */
+  --color-line-strong: #363636;
 
-  --color-ink: #22262a;
-  --color-ink-2: #464b4f;
-  --color-muted: #767a74;
-  --color-faint: #a3a59d;
+  /* Text */
+  --color-ink: #fbfaf7;             /* brand ivory */
+  --color-ink-2: #cccaca;           /* brand grey */
+  --color-muted: #8d8b88;
+  --color-faint: #5f5d5a;
 
-  --color-forest: #1f4d3a;
-  --color-forest-700: #173b2c;
-  --color-forest-600: #275e47;
-  --color-forest-100: #dfe9e2;
-  --color-forest-50: #eef4ef;
+  /* Action — ivory pill on carbon, exactly like the site's buttons */
+  --color-accent: #fbfaf7;
+  --color-accent-hover: #e7e5e0;
+  --color-accent-strong: #fbfaf7;
+  --color-accent-soft: #262626;
+  --color-accent-faint: #1a1a1a;
 
-  --color-gold: #b39556;
-  --color-gold-700: #8a7038;
-  --color-gold-100: #f1e9d6;
+  /* Secondary emphasis (eyebrows, outlines) */
+  --color-highlight: #cccaca;
+  --color-highlight-ink: #a9a7a3;
+  --color-highlight-soft: #222120;
 
-  --color-ok: #2f7a4e;
-  --color-ok-bg: #e5f1e8;
-  --color-warn: #a86a12;
-  --color-warn-bg: #f8ecd6;
-  --color-danger: #b0412e;
-  --color-danger-bg: #f6e2dd;
-  --color-info: #376a88;
-  --color-info-bg: #e2ecf2;
+  /* Status — only where it carries meaning */
+  --color-ok: #6fcf97;
+  --color-ok-bg: #11241a;
+  --color-warn: #e8b65a;
+  --color-warn-bg: #2a2110;
+  --color-danger: #f07563;
+  --color-danger-bg: #2c1512;
+  --color-info: #86b9dc;
+  --color-info-bg: #122029;
 
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 
-  --shadow-pop: 0 1px 2px rgb(34 38 42 / 0.06), 0 8px 24px -6px rgb(34 38 42 / 0.16);
-  --shadow-soft: 0 1px 2px rgb(34 38 42 / 0.05);
+  --shadow-pop: 0 0 0 1px rgb(251 250 247 / 0.06), 0 18px 40px -12px rgb(0 0 0 / 0.7);
+  --shadow-soft: 0 0 0 1px rgb(251 250 247 / 0.03);
 
   --animate-fade-in: fade-in 140ms ease-out;
   --animate-rise: rise 180ms cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -71,25 +78,28 @@
 
 @layer base {
   html {
-    color-scheme: light;
+    color-scheme: dark;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-ivory text-ink font-sans text-[14px] leading-[1.5];
-    font-feature-settings: 'ss01', 'cv11';
+    @apply bg-canvas text-ink font-sans text-[14px] leading-[1.5];
   }
   :focus-visible {
-    outline: 2px solid var(--color-gold);
+    outline: 2px solid var(--color-ink);
     outline-offset: 2px;
-    border-radius: 3px;
+    border-radius: 4px;
   }
   ::selection {
-    background: var(--color-gold-100);
+    background: var(--color-ink);
+    color: var(--color-canvas);
   }
   dialog::backdrop {
-    background: rgb(23 32 28 / 0.38);
-    backdrop-filter: blur(1px);
+    background: rgb(0 0 0 / 0.72);
+    backdrop-filter: blur(2px);
+  }
+  input[type='date'], input[type='datetime-local'], input[type='time'], input[type='month'] {
+    color-scheme: dark;
   }
   .tabular {
     font-variant-numeric: tabular-nums;
@@ -97,25 +107,49 @@
 }
 
 @layer components {
+  /* Small uppercase label, letter-spaced like the site's section kickers ("CREW MANIFEST — …"). */
   .eyebrow {
-    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-gold-700;
+    @apply font-sans text-[11px] font-medium uppercase tracking-[0.18em] text-highlight-ink;
   }
-  .rule {
-    @apply border-line;
+  /* Brand headline: bold, uppercase, tight. */
+  .display {
+    @apply font-display font-bold uppercase tracking-[-0.025em] leading-[0.98];
+  }
+  /* Outlined headline text, as in "WORLD STOP" on the site. */
+  .outline-text {
+    color: transparent;
+    -webkit-text-stroke: max(1px, 0.019em) rgb(251 250 247 / 0.4);
   }
   .skeleton {
-    background: linear-gradient(90deg, var(--color-porcelain) 0%, #f7f4ec 50%, var(--color-porcelain) 100%);
+    background: linear-gradient(90deg, var(--color-subtle) 0%, var(--color-track) 50%, var(--color-subtle) 100%);
     background-size: 200% 100%;
     @apply animate-shimmer rounded-sm;
   }
   .link {
-    @apply text-forest underline decoration-forest/30 underline-offset-2 hover:decoration-forest;
+    @apply text-ink underline decoration-ink/30 underline-offset-2 hover:decoration-ink;
+  }
+  /* Faint star field used on auth and portal screens. */
+  .starfield {
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgb(251 250 247 / 0.5), transparent 60%),
+      radial-gradient(1px 1px at 72% 12%, rgb(251 250 247 / 0.35), transparent 60%),
+      radial-gradient(1px 1px at 40% 62%, rgb(251 250 247 / 0.3), transparent 60%),
+      radial-gradient(1px 1px at 88% 74%, rgb(251 250 247 / 0.4), transparent 60%),
+      radial-gradient(1px 1px at 22% 86%, rgb(251 250 247 / 0.25), transparent 60%),
+      radial-gradient(1.5px 1.5px at 58% 34%, rgb(251 250 247 / 0.45), transparent 60%),
+      radial-gradient(1px 1px at 94% 40%, rgb(251 250 247 / 0.3), transparent 60%);
   }
 }
 
-/* Print: reports become clean A4 documents. */
+/* Print: reports become clean, light A4 documents regardless of the dark UI. */
 @media print {
   @page { size: A4; margin: 14mm; }
+  :root {
+    --color-canvas: #ffffff; --color-surface: #ffffff; --color-subtle: #f4f3f0; --color-track: #e6e4df;
+    --color-line: #e2e0da; --color-line-strong: #cfcdc6; --color-ink: #0c0c0c; --color-ink-2: #333333;
+    --color-muted: #666666; --color-faint: #999999; --color-accent: #0c0c0c; --color-highlight-ink: #555555;
+  }
+  html { color-scheme: light; }
   body { background: white; font-size: 11px; }
   .no-print { display: none !important; }
   .print-only { display: block !important; }

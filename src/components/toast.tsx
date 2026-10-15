@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           const Icon = t.tone === 'ok' ? CheckCircle2 : t.tone === 'error' ? TriangleAlert : Info
           const content = (
             <>
-              <Icon className={cx('mt-0.5 size-4 shrink-0', t.tone === 'ok' ? 'text-ok' : t.tone === 'error' ? 'text-danger' : 'text-gold-700')} />
+              <Icon className={cx('mt-0.5 size-4 shrink-0', t.tone === 'ok' ? 'text-ok' : t.tone === 'error' ? 'text-danger' : 'text-highlight-ink')} />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-medium text-ink">{t.title}</p>
                 {t.body && <p className="mt-0.5 line-clamp-2 text-[12.5px] text-muted">{t.body}</p>}
@@ -37,7 +37,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             </>
           )
           return (
-            <div key={t.id} className="pointer-events-auto flex animate-rise items-start gap-2.5 rounded-lg border border-line bg-paper px-3.5 py-3 shadow-pop">
+            <div key={t.id} className="pointer-events-auto flex animate-rise items-start gap-2.5 rounded-lg border border-line bg-surface px-3.5 py-3 shadow-pop">
               {t.href ? (
                 <Link to={t.href} className="flex flex-1 items-start gap-2.5" onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))}>
                   {content}

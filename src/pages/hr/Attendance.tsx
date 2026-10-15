@@ -13,13 +13,13 @@ interface Cell { date: string; status: string; checkIn: string | null; checkOut:
 interface Sheet { month: string; days: { date: string; working: boolean; kind: string; label?: string }[]; people: { userId: string; name: string; cells: Cell[]; summary: Record<string, number> }[]; canManage: boolean }
 
 const CELL: Record<string, { cls: string; short: string; label: string }> = {
-  present: { cls: 'bg-ok/80 text-paper', short: 'P', label: 'Present' },
-  remote: { cls: 'bg-forest-600 text-paper', short: 'R', label: 'Remote' },
-  half_day: { cls: 'bg-gold text-paper', short: '½', label: 'Half day' },
-  absent: { cls: 'bg-danger text-paper', short: 'A', label: 'Absent' },
+  present: { cls: 'bg-ok/80 text-surface', short: 'P', label: 'Present' },
+  remote: { cls: 'bg-accent-hover text-surface', short: 'R', label: 'Remote' },
+  half_day: { cls: 'bg-highlight text-surface', short: '½', label: 'Half day' },
+  absent: { cls: 'bg-danger text-surface', short: 'A', label: 'Absent' },
   leave: { cls: 'bg-info-bg text-info', short: 'L', label: 'Leave' },
-  holiday: { cls: 'bg-sage text-forest-700', short: 'H', label: 'Holiday' },
-  weekend: { cls: 'bg-porcelain text-faint', short: '·', label: 'Weekly off' },
+  holiday: { cls: 'bg-track text-accent-strong', short: 'H', label: 'Holiday' },
+  weekend: { cls: 'bg-subtle text-faint', short: '·', label: 'Weekly off' },
   no_record: { cls: 'border border-dashed border-line-strong text-faint', short: '?', label: 'No record' },
   upcoming: { cls: 'text-faint', short: '', label: 'Upcoming' },
   not_employed: { cls: 'text-faint', short: '', label: 'Not employed' },
@@ -34,7 +34,7 @@ function TodayPanel() {
     <Panel className="flex flex-wrap items-center gap-6 p-5">
       <div>
         <div className="eyebrow">Today · {fmtWeekday(todayIST())}</div>
-        <p className="mt-1 text-[13.5px] text-ink-2">{q.data && !q.data.day.working ? `Non-working day${q.data.day.label ? ` — ${q.data.day.label}` : ''}` : r?.check_in_at ? <>In at <span className="font-medium text-ink">{fmtTime(r.check_in_at)}</span>{r.check_out_at && <> · out at <span className="font-medium text-ink">{fmtTime(r.check_out_at)}</span></>}{r.status === 'remote' && <Badge tone="forest" className="ml-2">Remote</Badge>}</> : 'Not checked in yet'}</p>
+        <p className="mt-1 text-[13.5px] text-ink-2">{q.data && !q.data.day.working ? `Non-working day${q.data.day.label ? ` — ${q.data.day.label}` : ''}` : r?.check_in_at ? <>In at <span className="font-medium text-ink">{fmtTime(r.check_in_at)}</span>{r.check_out_at && <> · out at <span className="font-medium text-ink">{fmtTime(r.check_out_at)}</span></>}{r.status === 'remote' && <Badge tone="accent" className="ml-2">Remote</Badge>}</> : 'Not checked in yet'}</p>
       </div>
       <div className="ml-auto flex gap-2">
         {!r?.check_in_at && <><Button icon={<LogIn className="size-4" />} variant="primary" loading={checkIn.isPending} onClick={() => checkIn.mutate(false)}>Check in</Button><Button onClick={() => checkIn.mutate(true)}>Working remotely</Button></>}
@@ -91,7 +91,7 @@ function Corrections() {
               <Td>{fmtWeekday(c.work_date)}</Td>
               <Td className="text-ink-2">{CELL[c.requested_status]?.label} {c.requested_check_in && `· ${c.requested_check_in}–${c.requested_check_out ?? '?'}`}</Td>
               <Td className="max-w-[260px] text-[12.5px] text-ink-2">{c.reason}</Td>
-              <Td><Badge tone={c.status === 'pending' ? 'gold' : c.status === 'approved' ? 'ok' : 'danger'}>{c.status}</Badge>{c.decided_by_name && <div className="text-[11px] text-muted">{c.decided_by_name}</div>}</Td>
+              <Td><Badge tone={c.status === 'pending' ? 'highlight' : c.status === 'approved' ? 'ok' : 'danger'}>{c.status}</Badge>{c.decided_by_name && <div className="text-[11px] text-muted">{c.decided_by_name}</div>}</Td>
               <Td align="right" className="whitespace-nowrap">{d.canManage && c.status === 'pending' && <><Button size="sm" variant="ghost" onClick={() => decide.mutate({ id: c.id, decision: 'rejected' })}>Reject</Button><Button size="sm" variant="primary" onClick={() => decide.mutate({ id: c.id, decision: 'approved' })}>Approve</Button></>}</Td>
             </Tr>
           ))}</tbody>
@@ -137,12 +137,12 @@ export default function Attendance() {
           <QueryState q={q} empty={(d) => (d.people.length === 0 ? <EmptyState title="No one to show" /> : null)}>
             {(s) => (
               <>
-                <div className="overflow-x-auto rounded-lg border border-line bg-paper">
+                <div className="overflow-x-auto rounded-lg border border-line bg-surface">
                   <table className="w-full border-collapse text-[12px]">
                     <thead>
                       <tr>
-                        <th className="sticky left-0 z-10 min-w-[160px] border-b border-line bg-ivory px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">Employee</th>
-                        {s.days.map((d) => <th key={d.date} className={cx('border-b border-line px-0.5 py-1 text-center font-mono text-[10px] font-normal', d.working ? 'text-muted' : 'bg-porcelain/60 text-faint')} title={d.label}>{Number(d.date.slice(8))}<div className="text-[9px]">{'SMTWTFS'[new Date(d.date + 'T00:00:00Z').getUTCDay()]}</div></th>)}
+                        <th className="sticky left-0 z-10 min-w-[160px] border-b border-line bg-canvas px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">Employee</th>
+                        {s.days.map((d) => <th key={d.date} className={cx('border-b border-line px-0.5 py-1 text-center font-mono text-[10px] font-normal', d.working ? 'text-muted' : 'bg-subtle/60 text-faint')} title={d.label}>{Number(d.date.slice(8))}<div className="text-[9px]">{'SMTWTFS'[new Date(d.date + 'T00:00:00Z').getUTCDay()]}</div></th>)}
                         <th className="border-b border-line px-2 text-right text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">Present</th>
                         <th className="border-b border-line px-2 text-right text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">Leave</th>
                         <th className="border-b border-line px-2 text-right text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">No rec.</th>
@@ -151,13 +151,13 @@ export default function Attendance() {
                     <tbody>
                       {s.people.map((p) => (
                         <tr key={p.userId} className="border-b border-line/60 last:border-b-0">
-                          <td className="sticky left-0 z-10 bg-paper px-3 py-1.5 text-[12.5px] text-ink">{p.name}<div className="text-[10.5px] text-muted">{p.summary.working_days} working days</div></td>
+                          <td className="sticky left-0 z-10 bg-surface px-3 py-1.5 text-[12.5px] text-ink">{p.name}<div className="text-[10.5px] text-muted">{p.summary.working_days} working days</div></td>
                           {p.cells.map((c) => {
                             const st = CELL[c.status] ?? CELL.upcoming!
                             const editable = s.canManage && c.date <= todayIST() && !['weekend', 'holiday', 'not_employed', 'upcoming'].includes(c.status)
                             return (
                               <td key={c.date} className="px-[1px] py-1 text-center">
-                                <button disabled={!editable} onClick={() => setEdit({ userId: p.userId, name: p.name, date: c.date })} title={`${fmtWeekday(c.date)} · ${st.label}${c.leaveType ? ` (${c.leaveType})` : ''}${c.checkIn ? ` · ${fmtTime(c.checkIn)}–${c.checkOut ? fmtTime(c.checkOut) : '…'}` : ''}${c.source && c.source !== 'self' ? ` · ${c.source}` : ''}${c.label ? ` · ${c.label}` : ''}`} className={cx('mx-auto flex size-[22px] items-center justify-center rounded-[3px] font-mono text-[10px]', st.cls, editable && 'hover:ring-2 hover:ring-gold')}>
+                                <button disabled={!editable} onClick={() => setEdit({ userId: p.userId, name: p.name, date: c.date })} title={`${fmtWeekday(c.date)} · ${st.label}${c.leaveType ? ` (${c.leaveType})` : ''}${c.checkIn ? ` · ${fmtTime(c.checkIn)}–${c.checkOut ? fmtTime(c.checkOut) : '…'}` : ''}${c.source && c.source !== 'self' ? ` · ${c.source}` : ''}${c.label ? ` · ${c.label}` : ''}`} className={cx('mx-auto flex size-[22px] items-center justify-center rounded-[3px] font-mono text-[10px]', st.cls, editable && 'hover:ring-2 hover:ring-highlight')}>
                                   {st.short}
                                 </button>
                               </td>

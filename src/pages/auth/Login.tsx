@@ -43,7 +43,7 @@ export default function Login() {
           <Input id="password" type="password" autoComplete="current-password" aria-invalid={!!form.formState.errors.password} {...form.register('password')} />
         </Field>
         <div className="flex items-center justify-between pt-1">
-          <Link to="/forgot-password" className="text-[13px] text-forest hover:underline">Forgot password?</Link>
+          <Link to="/forgot-password" className="text-[13px] text-accent hover:underline">Forgot password?</Link>
           <Button type="submit" variant="primary" loading={form.formState.isSubmitting} className="min-w-28">Sign in</Button>
         </div>
       </form>

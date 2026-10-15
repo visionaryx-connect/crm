@@ -56,12 +56,12 @@ export default function Account() {
         <Section title="Where you’re signed in">
           <QueryState q={sessions}>
             {(rows) => (
-              <ul className="divide-y divide-line/70 rounded-lg border border-line bg-paper">
+              <ul className="divide-y divide-line/70 rounded-lg border border-line bg-surface">
                 {rows.map((s) => (
                   <li key={s.id} className="flex items-start gap-3 px-4 py-3">
                     <Monitor className="mt-0.5 size-4 text-muted" />
                     <div className="min-w-0 flex-1 text-[13px]"><p className="truncate text-ink">{s.user_agent || 'Unknown device'}</p><p className="text-[12px] text-muted">{s.ip ?? 'Unknown IP'} · since {fmtDateTime(s.created_at)} · active {relative(s.last_seen_at)}</p></div>
-                    {s.current ? <Badge tone="forest">This device</Badge> : <Button size="sm" variant="ghost" onClick={() => revoke.mutate(s.id)}>Sign out</Button>}
+                    {s.current ? <Badge tone="accent">This device</Badge> : <Button size="sm" variant="ghost" onClick={() => revoke.mutate(s.id)}>Sign out</Button>}
                   </li>
                 ))}
               </ul>

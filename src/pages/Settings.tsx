@@ -11,7 +11,7 @@ import { fmtDate, fmtWeekday, relative, todayIST } from '@/lib/format'
 import { Badge, Button, Checkbox, ConfirmDialog, Dialog, EmptyState, Field, IconButton, Input, PageHeader, Panel, QueryState, Section, Select, Table, Tabs, Td, Th, Tr } from '@/components/ui'
 import { useToast } from '@/components/toast'
 
-type Tab = 'company' | 'workdays' | 'holidays' | 'leave' | 'portal'
+type Tab = 'company' | 'workdays' | 'holidays' | 'leave' | 'portal' | 'automations'
 type Settings = {
   'company.profile': { name: string; website: string; supportEmail: string; supportPhone: string; address: string }
   'workdays.weekly': { weekdays: number[]; saturday: { mode: 'all_working' | 'all_off' | 'nth_off'; offWeeks?: number[] } }
@@ -19,6 +19,7 @@ type Settings = {
   'holidays.regions': { regions: string[] }
   'portal.defaults': { linkValidityDays: number; sessionHours: number; reverifyMinutes: number }
   'reports.schedule': { monthlySnapshots: boolean }
+  automations: { projectAutoStart: boolean; milestoneAutoStatus: boolean; dependencyReady: boolean; projectReadyForReview: boolean; projectAutoDelayed: boolean; assignedBacklogToTodo: boolean }
 }
 
 function useSettings(enabled: boolean) {
@@ -169,8 +170,8 @@ function HolidaysTab() {
   }
   return (
     <div>
-      <div className="mb-4 rounded-lg border border-gold/30 bg-gold-100/40 px-4 py-3 text-[13px] text-ink-2">
-        <p className="flex items-center gap-2 font-medium text-gold-700"><ShieldCheck className="size-4" />Source of truth: official government notifications</p>
+      <div className="mb-4 rounded-lg border border-highlight/30 bg-highlight-soft/40 px-4 py-3 text-[13px] text-ink-2">
+        <p className="flex items-center gap-2 font-medium text-highlight-ink"><ShieldCheck className="size-4" />Source of truth: official government notifications</p>
         <p className="mt-1">Load each year from the Government of India list and the Tamil Nadu G.O. under the Negotiable Instruments Act. Imported or edited holidays stay <em>pending</em> and have no effect on leave or attendance until someone verifies them against the recorded source.</p>
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -192,7 +193,7 @@ function HolidaysTab() {
                 <Td><span className="text-ink">{h.name}</span><div className="text-[11.5px] capitalize text-muted">{h.kind}{!h.is_day_off && ' · not a day off'}</div></Td>
                 <Td><Badge tone="outline">{h.region}</Badge></Td>
                 <Td className="max-w-[260px] text-[12px] text-ink-2"><span className="line-clamp-2">{h.source || <span className="text-danger">No source recorded</span>}</span>{h.source_url && <a href={h.source_url} target="_blank" rel="noreferrer noopener" className="link text-[11.5px]">Open source</a>}</Td>
-                <Td>{h.status === 'verified' ? <><Badge tone="ok">Verified</Badge><div className="text-[11px] text-muted">{h.verified_by_name} · {relative(h.verified_at)}</div></> : h.status === 'rejected' ? <Badge tone="danger">Rejected</Badge> : <Badge tone="gold">Pending</Badge>}</Td>
+                <Td>{h.status === 'verified' ? <><Badge tone="ok">Verified</Badge><div className="text-[11px] text-muted">{h.verified_by_name} · {relative(h.verified_at)}</div></> : h.status === 'rejected' ? <Badge tone="danger">Rejected</Badge> : <Badge tone="highlight">Pending</Badge>}</Td>
                 <Td align="right" className="whitespace-nowrap">
                   {h.status !== 'verified' && <IconButton label="Verify" onClick={() => verify.mutate({ id: h.id, status: 'verified' })}><Check className="size-4 text-ok" /></IconButton>}
                   {h.status === 'pending_verification' && <IconButton label="Reject" onClick={() => verify.mutate({ id: h.id, status: 'rejected' })}><X className="size-4 text-danger" /></IconButton>}
@@ -213,8 +214,8 @@ function HolidaysTab() {
           <Button variant="primary" disabled={!ov.reason.trim()} loading={addOv.isPending} onClick={() => addOv.mutate()}>Add</Button>
         </Panel>
         {q.data?.overrides.length ? (
-          <ul className="divide-y divide-line/70 rounded-lg border border-line bg-paper">{q.data.overrides.map((o) => (
-            <li key={o.override_date} className="flex items-center gap-3 px-4 py-2 text-[13px]"><span className="w-36 font-mono text-[12px]">{fmtDate(o.override_date)}</span><Badge tone={o.is_working ? 'forest' : 'gold'}>{o.is_working ? 'Working' : 'Off'}</Badge><span className="flex-1 text-ink-2">{o.reason}</span><IconButton label="Remove" onClick={() => delOv.mutate(o.override_date)}><Trash2 className="size-3.5" /></IconButton></li>
+          <ul className="divide-y divide-line/70 rounded-lg border border-line bg-surface">{q.data.overrides.map((o) => (
+            <li key={o.override_date} className="flex items-center gap-3 px-4 py-2 text-[13px]"><span className="w-36 font-mono text-[12px]">{fmtDate(o.override_date)}</span><Badge tone={o.is_working ? 'accent' : 'highlight'}>{o.is_working ? 'Working' : 'Off'}</Badge><span className="flex-1 text-ink-2">{o.reason}</span><IconButton label="Remove" onClick={() => delOv.mutate(o.override_date)}><Trash2 className="size-3.5" /></IconButton></li>
           ))}</ul>
         ) : <p className="text-[13px] text-muted">No exceptions for {year}.</p>}
       </Section>
@@ -247,6 +248,27 @@ function LeaveTypesTab() {
         </Dialog>
       )}
     </Section>
+  )
+}
+
+const AUTOMATIONS: { key: keyof Settings['automations']; label: string; description: string }[] = [
+  { key: 'assignedBacklogToTodo', label: 'Assigned work leaves the backlog', description: 'When a Backlog task gets an owner, it moves to To do.' },
+  { key: 'projectAutoStart', label: 'Projects start themselves', description: 'When the first task of a Planning / Not started project starts, the project moves to In progress.' },
+  { key: 'milestoneAutoStatus', label: 'Milestones follow their tasks', description: 'A milestone becomes In progress when its work starts, Achieved when all its tasks are approved, and reopens if a task is reopened. The team is notified when it is achieved.' },
+  { key: 'dependencyReady', label: 'Dependent work is released', description: 'When everything a task depends on is complete, it moves from Backlog to To do and its owner gets a “ready to start” notice.' },
+  { key: 'projectReadyForReview', label: 'Finished projects go to review', description: 'When every task is complete, the project moves to In review and the project manager is asked to approve deliverables and close it.' },
+  { key: 'projectAutoDelayed', label: 'Overdue projects are flagged', description: 'Every morning (08:00 IST), running projects past their target date are set to Delayed and the project manager is notified.' },
+]
+
+function AutomationsTab({ s }: { s: Settings }) {
+  const [v, setV] = useState(s.automations)
+  const save = useSaveSetting('automations')
+  return (
+    <Panel className="max-w-3xl p-5">
+      <p className="mb-5 text-[13px] text-ink-2">Automations keep statuses in step with the actual work so nobody has to update them by hand. Every automatic change is recorded in the project’s Activity tab as “Automation”.</p>
+      <div className="space-y-4">{AUTOMATIONS.map((a) => <Checkbox key={a.key} label={a.label} description={a.description} checked={v[a.key]} onChange={(e) => setV({ ...v, [a.key]: e.target.checked })} />)}</div>
+      <div className="mt-6 flex justify-end"><Button variant="primary" loading={save.isPending} onClick={() => save.mutate(v)}>Save automations</Button></div>
+    </Panel>
   )
 }
 
@@ -283,7 +305,7 @@ export default function SettingsPage() {
     ...(manage ? [{ value: 'company' as Tab, label: 'Company' }, { value: 'workdays' as Tab, label: 'Working days' }] : []),
     ...(can('holidays.manage') ? [{ value: 'holidays' as Tab, label: 'Holidays' }] : []),
     ...(can('leave.manage') ? [{ value: 'leave' as Tab, label: 'Leave types' }] : []),
-    ...(manage ? [{ value: 'portal' as Tab, label: 'Portal & reports' }] : []),
+    ...(manage ? [{ value: 'automations' as Tab, label: 'Automations' }, { value: 'portal' as Tab, label: 'Portal & reports' }] : []),
   ]
   const tab = (params.get('tab') as Tab) || tabs[0]?.value || 'holidays'
   const s = useSettings(manage)
@@ -297,8 +319,8 @@ export default function SettingsPage() {
       </PageHeader>
       {tab === 'holidays' && <HolidaysTab />}
       {tab === 'leave' && <LeaveTypesTab />}
-      {['company', 'workdays', 'portal'].includes(tab) && (
-        <QueryState q={s}>{(data) => (tab === 'company' ? <CompanyTab s={data} /> : tab === 'workdays' ? <WorkdaysTab s={data} /> : <PortalTab s={data} />)}</QueryState>
+      {['company', 'workdays', 'portal', 'automations'].includes(tab) && (
+        <QueryState q={s}>{(data) => (tab === 'company' ? <CompanyTab s={data} /> : tab === 'workdays' ? <WorkdaysTab s={data} /> : tab === 'automations' ? <AutomationsTab s={data} /> : <PortalTab s={data} />)}</QueryState>
       )}
     </div>
   )

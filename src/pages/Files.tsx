@@ -21,12 +21,12 @@ export default function Files() {
             <thead><tr><Th>File</Th><Th>Project</Th><Th>Linked to</Th><Th>Size</Th><Th>Uploaded</Th><Th /></tr></thead>
             <tbody>{d.files.map((f) => (
               <Tr key={f.id}>
-                <Td><span className="font-medium text-ink">{f.file_name}</span>{f.client_visible ? <Badge tone="gold" className="ml-2">Shared with client</Badge> : null}<div className="font-mono text-[11px] text-muted">{f.content_type}</div></Td>
-                <Td><Link to={`/projects/${f.project_id}?tab=files`} className="hover:underline"><span className="font-mono text-[11px] text-gold-700">{f.project_reference}</span> {f.project_name}</Link></Td>
+                <Td><span className="font-medium text-ink">{f.file_name}</span>{f.client_visible ? <Badge tone="highlight" className="ml-2">Shared with client</Badge> : null}<div className="font-mono text-[11px] text-muted">{f.content_type}</div></Td>
+                <Td><Link to={`/projects/${f.project_id}?tab=files`} className="hover:underline"><span className="font-mono text-[11px] text-highlight-ink">{f.project_reference}</span> {f.project_name}</Link></Td>
                 <Td className="text-ink-2">{f.deliverable_title ? `${f.deliverable_title} · v${f.version}` : f.task_id ? <Link to={`/tasks/${f.task_id}`} className="hover:underline">#{f.task_number} {f.task_title}</Link> : '—'}</Td>
                 <Td className="font-mono text-[12px] text-muted">{bytes(f.size_bytes)}</Td>
                 <Td className="text-ink-2">{f.uploaded_by_name} · {relative(f.created_at)}</Td>
-                <Td align="right"><a href={`/api/files/${f.id}/download`} className="inline-flex text-forest" aria-label={`Download ${f.file_name}`}><Download className="size-4" /></a></Td>
+                <Td align="right"><a href={`/api/files/${f.id}/download`} className="inline-flex text-accent" aria-label={`Download ${f.file_name}`}><Download className="size-4" /></a></Td>
               </Tr>
             ))}</tbody>
           </Table>

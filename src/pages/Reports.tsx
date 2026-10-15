@@ -37,14 +37,14 @@ function ReportView({ doc, snapshot }: { doc: ReportDoc; snapshot?: { generatedA
   return (
     <article className="animate-fade-in">
       <div className="print-only mb-4">
-        <div className="font-display text-[22px]">Visionary X</div>
+        <div className="font-display font-bold tracking-[-0.02em] text-[22px]">Visionary X</div>
         <div className="text-[11px] text-muted">Generated {fmtDateTime(snapshot?.generatedAt ?? doc.meta.generatedAt)} · IST</div>
       </div>
       <header className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-line pb-4">
         <div>
           <div className="eyebrow">{doc.meta.title}</div>
-          <h2 className="font-display text-[24px] text-ink">{doc.meta.scopeName}</h2>
-          <p className="text-[13px] text-muted">{fmtDate(doc.meta.period.start)} – {fmtDate(doc.meta.period.end)} · {doc.meta.timezone}{snapshot && <> · <Badge tone="gold">Snapshot {snapshot.source} · {fmtDateTime(snapshot.generatedAt)}</Badge></>}</p>
+          <h2 className="font-display font-bold tracking-[-0.02em] text-[24px] text-ink">{doc.meta.scopeName}</h2>
+          <p className="text-[13px] text-muted">{fmtDate(doc.meta.period.start)} – {fmtDate(doc.meta.period.end)} · {doc.meta.timezone}{snapshot && <> · <Badge tone="highlight">Snapshot {snapshot.source} · {fmtDateTime(snapshot.generatedAt)}</Badge></>}</p>
         </div>
         <div className="no-print flex gap-2">
           <Button icon={<Download className="size-4" />} onClick={exportAll}>CSV</Button>
@@ -52,11 +52,11 @@ function ReportView({ doc, snapshot }: { doc: ReportDoc; snapshot?: { generatedA
         </div>
       </header>
 
-      <dl className="mb-8 grid grid-cols-2 overflow-hidden rounded-lg border border-line bg-paper sm:grid-cols-3 lg:grid-cols-5">
+      <dl className="mb-8 grid grid-cols-2 overflow-hidden rounded-lg border border-line bg-surface sm:grid-cols-3 lg:grid-cols-5">
         {doc.summary.map((s) => (
           <div key={s.key} className="border-b border-r border-line/70 px-4 py-3">
             <dt className="text-[11px] uppercase tracking-[0.07em] text-muted">{s.label}</dt>
-            <dd className="mt-1 font-display text-[22px] leading-tight tabular text-ink">{s.value === null ? <span className="text-[13px] font-sans text-faint">Not available</span> : String(s.value).replace(/_/g, ' ')}</dd>
+            <dd className="mt-1 font-display font-bold tracking-[-0.02em] text-[22px] leading-tight tabular text-ink">{s.value === null ? <span className="text-[13px] font-sans text-faint">Not available</span> : String(s.value).replace(/_/g, ' ')}</dd>
             {s.note && <dd className="mt-0.5 text-[11px] text-muted">{s.note}</dd>}
           </div>
         ))}
@@ -64,17 +64,17 @@ function ReportView({ doc, snapshot }: { doc: ReportDoc; snapshot?: { generatedA
 
       {doc.charts.completionsByDay && doc.charts.completionsByDay.length > 0 && (
         <Section title="Completions per day">
-          <Panel className="px-2 pt-4"><div className="h-[180px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={doc.charts.completionsByDay}><CartesianGrid vertical={false} stroke="#e1dccf" /><XAxis dataKey="day" tickFormatter={(v) => fmtDateShort(String(v))} tick={{ fontSize: 10.5, fill: '#767a74' }} axisLine={false} tickLine={false} /><YAxis allowDecimals={false} width={28} tick={{ fontSize: 10.5, fill: '#767a74' }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ fontSize: 12, borderRadius: 6 }} /><Bar dataKey="completed" fill="#1f4d3a" radius={[2, 2, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel>
+          <Panel className="px-2 pt-4"><div className="h-[180px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={doc.charts.completionsByDay}><CartesianGrid vertical={false} stroke="#262626" /><XAxis dataKey="day" tickFormatter={(v) => fmtDateShort(String(v))} tick={{ fontSize: 10.5, fill: '#8d8b88' }} axisLine={false} tickLine={false} /><YAxis allowDecimals={false} width={28} tick={{ fontSize: 10.5, fill: '#8d8b88' }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: '#141414', color: '#fbfaf7', fontSize: 12, borderRadius: 6 }} /><Bar dataKey="completed" fill="#fbfaf7" radius={[2, 2, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel>
         </Section>
       )}
       {doc.charts.departmentWorkload && doc.charts.departmentWorkload.length > 0 && (
         <Section title="Department workload">
-          <Panel className="px-2 pt-4"><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={doc.charts.departmentWorkload}><CartesianGrid vertical={false} stroke="#e1dccf" /><XAxis dataKey="department" tick={{ fontSize: 11, fill: '#464b4f' }} axisLine={false} tickLine={false} /><YAxis width={28} tick={{ fontSize: 10.5, fill: '#767a74' }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ fontSize: 12, borderRadius: 6 }} /><Bar dataKey="completed" name="Completed" fill="#1f4d3a" radius={[2, 2, 0, 0]} /><Bar dataKey="open_at_end" name="Open at end" fill="#b39556" radius={[2, 2, 0, 0]} /><Bar dataKey="overdue_at_end" name="Overdue" fill="#b0412e" radius={[2, 2, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel>
+          <Panel className="px-2 pt-4"><div className="h-[200px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={doc.charts.departmentWorkload}><CartesianGrid vertical={false} stroke="#262626" /><XAxis dataKey="department" tick={{ fontSize: 11, fill: '#cccaca' }} axisLine={false} tickLine={false} /><YAxis width={28} tick={{ fontSize: 10.5, fill: '#8d8b88' }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: '#141414', color: '#fbfaf7', fontSize: 12, borderRadius: 6 }} /><Bar dataKey="completed" name="Completed" fill="#fbfaf7" radius={[2, 2, 0, 0]} /><Bar dataKey="open_at_end" name="Open at end" fill="#8d8b88" radius={[2, 2, 0, 0]} /><Bar dataKey="overdue_at_end" name="Overdue" fill="#ef6b5b" radius={[2, 2, 0, 0]} /></BarChart></ResponsiveContainer></div></Panel>
         </Section>
       )}
       {doc.charts.progress && doc.charts.progress.length > 1 && (
         <Section title="Progress during the period">
-          <Panel className="px-2 pt-4"><div className="h-[180px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={doc.charts.progress}><CartesianGrid vertical={false} stroke="#e1dccf" /><XAxis dataKey="date" tickFormatter={(v) => fmtDateShort(String(v))} tick={{ fontSize: 10.5, fill: '#767a74' }} axisLine={false} tickLine={false} /><YAxis domain={[0, 100]} unit="%" width={36} tick={{ fontSize: 10.5, fill: '#767a74' }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ fontSize: 12, borderRadius: 6 }} /><Line type="stepAfter" dataKey="progress" stroke="#1f4d3a" strokeWidth={1.8} dot={{ r: 2.5 }} /></LineChart></ResponsiveContainer></div></Panel>
+          <Panel className="px-2 pt-4"><div className="h-[180px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={doc.charts.progress}><CartesianGrid vertical={false} stroke="#262626" /><XAxis dataKey="date" tickFormatter={(v) => fmtDateShort(String(v))} tick={{ fontSize: 10.5, fill: '#8d8b88' }} axisLine={false} tickLine={false} /><YAxis domain={[0, 100]} unit="%" width={36} tick={{ fontSize: 10.5, fill: '#8d8b88' }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: '#141414', color: '#fbfaf7', fontSize: 12, borderRadius: 6 }} /><Line type="stepAfter" dataKey="progress" stroke="#fbfaf7" strokeWidth={1.8} dot={{ r: 2.5 }} /></LineChart></ResponsiveContainer></div></Panel>
         </Section>
       )}
 
@@ -173,7 +173,7 @@ export default function Reports() {
               <Tr key={s.id} onClick={() => { setSnapshotId(s.id); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
                 <Td><span className="capitalize text-ink">{s.report_type}</span><div className="text-[12px] text-muted">{s.scope_name}</div></Td>
                 <Td className="text-ink-2">{fmtDate(s.period_start)} – {fmtDate(s.period_end)}</Td>
-                <Td><Badge tone={s.source === 'scheduled' ? 'forest' : 'outline'}>{s.source}</Badge></Td>
+                <Td><Badge tone={s.source === 'scheduled' ? 'accent' : 'outline'}>{s.source}</Badge></Td>
                 <Td className="text-ink-2">{fmtDateTime(s.generated_at)}{s.generated_by_name && ` · ${s.generated_by_name}`}</Td>
                 <Td align="right"><Archive className="ml-auto size-4 text-muted" /></Td>
               </Tr>

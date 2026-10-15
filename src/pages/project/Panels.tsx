@@ -58,7 +58,7 @@ export function MilestonesPanel({ data }: { data: ProjectData }) {
             const pct = m.task_count ? Math.round((m.completed_count / m.task_count) * 100) : null
             return (
               <li key={m.id} className="relative mb-4 pl-6 last:mb-0">
-                <span className={cx('absolute -left-[6px] top-3 size-[11px] rotate-45 border-2 border-ivory', m.status === 'achieved' ? 'bg-ok' : m.status === 'missed' ? 'bg-danger' : m.status === 'in_progress' ? 'bg-forest' : 'bg-gold')} aria-hidden />
+                <span className={cx('absolute -left-[6px] top-3 size-[11px] rotate-45 border-2 border-canvas', m.status === 'achieved' ? 'bg-ok' : m.status === 'missed' ? 'bg-danger' : m.status === 'in_progress' ? 'bg-accent' : 'bg-highlight')} aria-hidden />
                 <Panel className="flex flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
                   <div className="min-w-[220px] flex-1">
                     <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export function MilestonesPanel({ data }: { data: ProjectData }) {
                     {m.description && <p className="text-[12.5px] text-muted">{m.description}</p>}
                     {m.depends_on.length > 0 && <p className="text-[11.5px] text-muted">After: {m.depends_on.map((d) => data.milestones.find((x) => x.id === d)?.title).join(', ')}</p>}
                   </div>
-                  <Badge tone={m.status === 'achieved' ? 'ok' : m.status === 'missed' ? 'danger' : m.status === 'in_progress' ? 'forest' : 'neutral'}>{m.status.replace('_', ' ')}</Badge>
+                  <Badge tone={m.status === 'achieved' ? 'ok' : m.status === 'missed' ? 'danger' : m.status === 'in_progress' ? 'accent' : 'neutral'}>{m.status.replace('_', ' ')}</Badge>
                   <div className="w-28 text-[12px] text-muted">{pct === null ? 'No tasks' : `${m.completed_count}/${m.task_count} tasks · ${pct}%`}</div>
                   <div className="w-28 text-[12.5px]">{m.achieved_at ? <span className="text-ok">Achieved {fmtDate(m.achieved_at)}</span> : <DueText date={m.due_date} />}</div>
                   <div className="font-mono text-[11px] text-muted">w {m.weight}</div>
@@ -160,11 +160,11 @@ export function DeliverablesPanel({ data }: { data: ProjectData }) {
                 <ul className="mt-3 divide-y divide-line/70 rounded-md border border-line">
                   {d.versions.map((v) => (
                     <li key={v.id} className="flex items-center gap-3 px-3 py-2 text-[12.5px]">
-                      <span className="font-mono text-[11px] text-gold-700">v{v.version}</span>
+                      <span className="font-mono text-[11px] text-highlight-ink">v{v.version}</span>
                       <span className="min-w-0 flex-1 truncate text-ink">{v.file_name}</span>
-                      {v.client_visible ? <Badge tone="gold"><Eye className="size-3" /> Client can see</Badge> : <span className="inline-flex items-center gap-1 text-[11px] text-faint"><Lock className="size-3" /> Internal</span>}
+                      {v.client_visible ? <Badge tone="highlight"><Eye className="size-3" /> Client can see</Badge> : <span className="inline-flex items-center gap-1 text-[11px] text-faint"><Lock className="size-3" /> Internal</span>}
                       <span className="text-muted">{bytes(v.size_bytes)} · {v.uploaded_by_name} · {relative(v.created_at)}</span>
-                      <a href={`/api/files/${v.id}/download`} className="text-forest hover:underline" aria-label={`Download ${v.file_name}`}><Download className="size-3.5" /></a>
+                      <a href={`/api/files/${v.id}/download`} className="text-accent hover:underline" aria-label={`Download ${v.file_name}`}><Download className="size-3.5" /></a>
                     </li>
                   ))}
                 </ul>
@@ -172,7 +172,7 @@ export function DeliverablesPanel({ data }: { data: ProjectData }) {
               {d.clientFeedback.length > 0 && (
                 <div className="mt-3 space-y-1.5">
                   {d.clientFeedback.map((f) => (
-                    <div key={f.id} className="rounded-md bg-gold-100/50 px-3 py-2 text-[12.5px]"><span className="font-medium">{f.author_name}</span> <span className="text-muted">· {f.kind.replace('_', ' ')} · {relative(f.created_at)}</span><p className="text-ink-2">{f.body}</p></div>
+                    <div key={f.id} className="rounded-md bg-highlight-soft/50 px-3 py-2 text-[12.5px]"><span className="font-medium">{f.author_name}</span> <span className="text-muted">· {f.kind.replace('_', ' ')} · {relative(f.created_at)}</span><p className="text-ink-2">{f.body}</p></div>
                   ))}
                 </div>
               )}
@@ -199,13 +199,13 @@ export function FilesPanel({ data }: { data: ProjectData }) {
     <Section title="Files" description="Private by default. Downloads are authorised per request; nothing is publicly accessible." actions={data.access.canContribute && <UploadButton projectId={pid} onDone={() => q.refetch()} />}>
       {q.isLoading ? <SkeletonRows /> : q.error ? <ErrorState error={q.error} /> : (
         <>
-          {!q.data!.storageEnabled && <p className="mb-3 rounded-md border border-gold/40 bg-gold-100/60 px-3 py-2 text-[13px] text-gold-700">File storage (Cloudflare R2) is not configured for this deployment, so uploads are disabled.</p>}
+          {!q.data!.storageEnabled && <p className="mb-3 rounded-md border border-highlight/40 bg-highlight-soft/60 px-3 py-2 text-[13px] text-highlight-ink">File storage (Cloudflare R2) is not configured for this deployment, so uploads are disabled.</p>}
           {q.data!.files.length === 0 ? <EmptyState icon={<FileUp className="size-7" strokeWidth={1.4} />} title="No files yet" /> : (
             <Table>
               <thead><tr><Th>File</Th><Th>Linked to</Th><Th>Size</Th><Th>Uploaded</Th><Th /></tr></thead>
               <tbody>{q.data!.files.map((f) => (
                 <Tr key={f.id}>
-                  <Td><a href={`/api/files/${f.id}/download`} className="font-medium text-ink hover:underline">{f.file_name}</a>{f.client_visible ? <Badge tone="gold" className="ml-2">Shared</Badge> : null}</Td>
+                  <Td><a href={`/api/files/${f.id}/download`} className="font-medium text-ink hover:underline">{f.file_name}</a>{f.client_visible ? <Badge tone="highlight" className="ml-2">Shared</Badge> : null}</Td>
                   <Td className="text-ink-2">{f.deliverable_title ? `Deliverable: ${f.deliverable_title} (v${f.version})` : f.task_title ? `#${f.task_number} ${f.task_title}` : 'Project'}</Td>
                   <Td className="font-mono text-[12px] text-muted">{bytes(f.size_bytes)}</Td>
                   <Td className="text-ink-2">{f.uploaded_by_name} · {relative(f.created_at)}</Td>
@@ -236,10 +236,10 @@ export function UpdatesPanel({ data }: { data: ProjectData }) {
           <ol className="space-y-3">
             {q.data!.map((u) => (
               <li key={u.id}>
-                <Panel className={cx('p-4', u.client_visible ? 'border-l-2 border-l-gold' : '')}>
+                <Panel className={cx('p-4', u.client_visible ? 'border-l-2 border-l-highlight' : '')}>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-ink">{u.title}</span>
-                    {u.client_visible ? <Badge tone="gold"><Eye className="size-3" /> Client-visible</Badge> : <Badge tone="outline"><Lock className="size-3" /> Internal</Badge>}
+                    {u.client_visible ? <Badge tone="highlight"><Eye className="size-3" /> Client-visible</Badge> : <Badge tone="outline"><Lock className="size-3" /> Internal</Badge>}
                     <span className="ml-auto text-[12px] text-muted">{u.created_by_name} · {fmtDateTime(u.created_at)}</span>
                   </div>
                   {u.body && <p className="mt-2 whitespace-pre-wrap text-[13px] text-ink-2">{u.body}</p>}
@@ -278,13 +278,13 @@ export function FeedbackPanel({ data }: { data: ProjectData }) {
             <li key={f.id}>
               <Panel className="p-4">
                 <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted">
-                  <Badge tone={f.kind === 'revision_request' ? 'warn' : f.kind === 'approval' ? 'ok' : 'gold'}>{f.kind.replace('_', ' ')}</Badge>
+                  <Badge tone={f.kind === 'revision_request' ? 'warn' : f.kind === 'approval' ? 'ok' : 'highlight'}>{f.kind.replace('_', ' ')}</Badge>
                   <span className="font-medium text-ink">{f.author_name}</span>{f.author_email && <span>({f.author_email})</span>}
                   <span>· {fmtDateTime(f.created_at)}</span>{f.deliverable_title && <span>· on “{f.deliverable_title}”</span>}
-                  <Badge tone={f.status === 'open' ? 'danger' : f.status === 'acknowledged' ? 'gold' : 'ok'} className="ml-auto">{f.status}</Badge>
+                  <Badge tone={f.status === 'open' ? 'danger' : f.status === 'acknowledged' ? 'highlight' : 'ok'} className="ml-auto">{f.status}</Badge>
                 </div>
                 <p className="mt-2 whitespace-pre-wrap text-[13.5px] text-ink">{f.body}</p>
-                {f.response && <div className="mt-3 rounded-md bg-forest-50 px-3 py-2 text-[13px] text-forest-700"><span className="font-medium">Reply</span> · {f.responded_by_name} {relative(f.responded_at)}<p className="mt-0.5 whitespace-pre-wrap">{f.response}</p></div>}
+                {f.response && <div className="mt-3 rounded-md bg-accent-faint px-3 py-2 text-[13px] text-accent-strong"><span className="font-medium">Reply</span> · {f.responded_by_name} {relative(f.responded_at)}<p className="mt-0.5 whitespace-pre-wrap">{f.response}</p></div>}
                 {data.access.canManage && f.status !== 'resolved' && (
                   replying === f.id ? (
                     <div className="mt-3 space-y-2">
@@ -346,11 +346,11 @@ export function ActivityPanel({ projectId }: { projectId: string }) {
   return (
     <Section title="Activity history">
       {q.isLoading ? <SkeletonRows /> : q.error ? <ErrorState error={q.error} /> : q.data!.length === 0 ? <EmptyState title="No activity yet" /> : (
-        <ol className="space-y-0 rounded-lg border border-line bg-paper">
+        <ol className="space-y-0 rounded-lg border border-line bg-surface">
           {q.data!.map((e) => (
             <li key={e.id} className="flex gap-3 border-b border-line/70 px-4 py-2.5 text-[13px] last:border-b-0">
               <span className="w-32 shrink-0 font-mono text-[11px] leading-5 text-muted">{fmtDateTime(e.created_at)}</span>
-              <span className="text-ink-2"><span className="font-medium text-ink">{e.actor_type === 'client' ? 'Client' : e.actor_type === 'system' ? 'System' : e.actor_name ?? 'Someone'}</span> — {e.summary}</span>
+              <span className="text-ink-2"><span className="font-medium text-ink">{e.actor_type === 'client' ? 'Client' : e.actor_type === 'system' ? '✦ Automation' : e.actor_name ?? 'Someone'}</span> — {e.summary.replace(/^Automation: /, '')}</span>
             </li>
           ))}
         </ol>

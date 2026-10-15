@@ -3,12 +3,12 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Bell, BarChart3, Briefcase, CalendarDays, ChevronsLeft, ChevronsRight, CircleUserRound, ClipboardCheck, FileStack, FolderKanban, LayoutGrid, LogOut, Menu,
-  Plus, Search, Settings, ShieldCheck, Users, UsersRound, Clock3, X,
+  Compass, Plus, Search, Settings, ShieldCheck, Users, UsersRound, Clock3, X,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { useRealtimeStatus } from '@/lib/realtime'
-import { Avatar, cx, Kbd } from '@/components/ui'
+import { Avatar, BrandLockup, BrandMark, cx, Kbd } from '@/components/ui'
 import { CommandPalette } from './CommandPalette'
 
 interface NavItem {
@@ -41,7 +41,10 @@ const NAV: { group: string; items: NavItem[] }[] = [
   },
   {
     group: 'Insight',
-    items: [{ to: '/reports', label: 'Reports', icon: BarChart3 }],
+    items: [
+      { to: '/reports', label: 'Reports', icon: BarChart3 },
+      { to: '/guide', label: 'Workflow guide', icon: Compass },
+    ],
   },
   {
     group: 'Admin',
@@ -76,27 +79,17 @@ function useCollapsed() {
 function Sidebar({ collapsed, onToggle, mobile, onNavigate }: { collapsed: boolean; onToggle?: () => void; mobile?: boolean; onNavigate?: () => void }) {
   const { can } = useAuth()
   return (
-    <nav aria-label="Main" className={cx('flex h-full flex-col bg-forest-700 text-[#d9e3dc]', collapsed ? 'w-[60px]' : 'w-[228px]')}>
-      <div className={cx('flex h-14 items-center border-b border-white/8', collapsed ? 'justify-center' : 'px-4')}>
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-7 items-center justify-center rounded-[5px] bg-gold font-display text-[15px] font-semibold text-forest-700" aria-hidden>
-            X
-          </span>
-          {!collapsed && (
-            <span className="leading-tight">
-              <span className="block font-display text-[15px] text-paper">Visionary X</span>
-              <span className="block font-mono text-[9.5px] uppercase tracking-[0.18em] text-[#9db3a5]">Operations</span>
-            </span>
-          )}
-        </div>
-      </div>
+    <nav aria-label="Main" className={cx('flex h-full flex-col border-r border-line bg-canvas text-ink-2', collapsed ? 'w-[60px]' : 'w-[228px]')}>
+      <div className={cx('flex h-14 items-center border-b border-line', collapsed ? 'justify-center' : 'px-4')}>
+        {collapsed ? <BrandMark size={28} /> : <BrandLockup size={28} sub="Operations" />}
+              </div>
       <div className="flex-1 overflow-y-auto py-3">
         {NAV.map((g) => {
           const items = g.items.filter((i) => !i.perm || can(...i.perm))
           if (items.length === 0) return null
           return (
             <div key={g.group} className="mb-4">
-              {!collapsed && <div className="mb-1 px-4 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[#7f9a89]">{g.group}</div>}
+              {!collapsed && <div className="mb-1 px-4 text-[10px] font-medium uppercase tracking-[0.2em] text-faint">{g.group}</div>}
               <ul className="space-y-px px-2">
                 {items.map((i) => (
                   <li key={i.to}>
@@ -109,13 +102,13 @@ function Sidebar({ collapsed, onToggle, mobile, onNavigate }: { collapsed: boole
                         cx(
                           'group relative flex h-8 items-center gap-2.5 rounded-md text-[13px] transition-colors',
                           collapsed ? 'justify-center' : 'px-2.5',
-                          isActive ? 'bg-white/[0.09] text-paper' : 'text-[#c3d1c8] hover:bg-white/[0.05] hover:text-paper',
+                          isActive ? 'bg-subtle text-ink' : 'text-ink-2 hover:bg-subtle/70 hover:text-ink',
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          {isActive && <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-gold" aria-hidden />}
+                          {isActive && <span className="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-ink" aria-hidden />}
                           <i.icon className="size-[15px] shrink-0" strokeWidth={1.7} />
                           {!collapsed && <span>{i.label}</span>}
                         </>
@@ -129,7 +122,7 @@ function Sidebar({ collapsed, onToggle, mobile, onNavigate }: { collapsed: boole
         })}
       </div>
       {!mobile && onToggle && (
-        <button onClick={onToggle} className="flex h-10 items-center justify-center gap-2 border-t border-white/8 text-[12px] text-[#9db3a5] hover:text-paper" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+        <button onClick={onToggle} className="flex h-10 items-center justify-center gap-2 border-t border-line text-[12px] text-muted hover:text-ink" aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
           {collapsed ? <ChevronsRight className="size-4" /> : (<><ChevronsLeft className="size-4" /> Collapse</>)}
         </button>
       )}
@@ -142,7 +135,7 @@ function LiveIndicator() {
   const label = s === 'live' ? 'Live updates on' : s === 'connecting' ? 'Connecting…' : 'Offline — reconnecting'
   return (
     <span className="hidden items-center gap-1.5 text-[11.5px] text-muted md:inline-flex" title={label}>
-      <span className={cx('size-1.5 rounded-full', s === 'live' ? 'bg-ok' : s === 'connecting' ? 'bg-gold animate-pulse' : 'bg-danger')} aria-hidden />
+      <span className={cx('size-1.5 rounded-full', s === 'live' ? 'bg-ok' : s === 'connecting' ? 'bg-highlight animate-pulse' : 'bg-danger')} aria-hidden />
       {s === 'live' ? 'Live' : s === 'connecting' ? 'Connecting' : 'Offline'}
     </span>
   )
@@ -163,7 +156,7 @@ function UserMenu() {
   }
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 hover:bg-porcelain" aria-haspopup="menu" aria-expanded={open}>
+      <button onClick={() => setOpen((o) => !o)} className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 hover:bg-subtle" aria-haspopup="menu" aria-expanded={open}>
         <Avatar name={me.user.name} color={me.user.avatarColor} size={26} />
         <span className="hidden text-left leading-tight lg:block">
           <span className="block text-[12.5px] font-medium text-ink">{me.user.name}</span>
@@ -173,15 +166,15 @@ function UserMenu() {
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div role="menu" className="absolute right-0 z-40 mt-1 w-56 animate-rise rounded-lg border border-line bg-paper p-1 shadow-pop" onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}>
+          <div role="menu" className="absolute right-0 z-40 mt-1 w-56 animate-rise rounded-lg border border-line bg-surface p-1 shadow-pop" onKeyDown={(e) => e.key === 'Escape' && setOpen(false)}>
             <div className="border-b border-line px-3 py-2">
               <p className="text-[13px] font-medium">{me.user.name}</p>
               <p className="truncate text-[12px] text-muted">{me.user.email}</p>
             </div>
-            <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] hover:bg-ivory" onClick={() => { setOpen(false); nav(`/team/${me.user.id}`) }}>
+            <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] hover:bg-canvas" onClick={() => { setOpen(false); nav(`/team/${me.user.id}`) }}>
               <CircleUserRound className="size-4 text-muted" /> My profile
             </button>
-            <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] hover:bg-ivory" onClick={() => { setOpen(false); nav('/account') }}>
+            <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] hover:bg-canvas" onClick={() => { setOpen(false); nav('/account') }}>
               <ShieldCheck className="size-4 text-muted" /> Account & security
             </button>
             <button role="menuitem" className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] text-danger hover:bg-danger-bg" onClick={logout}>
@@ -206,15 +199,15 @@ function QuickCreate() {
   ].filter(Boolean) as { label: string; to: string }[]
   return (
     <div className="relative">
-      <button onClick={() => setOpen((o) => !o)} className="inline-flex h-8 items-center gap-1.5 rounded-md bg-forest px-2.5 text-[12.5px] font-medium text-paper hover:bg-forest-600" aria-haspopup="menu" aria-expanded={open}>
+      <button onClick={() => setOpen((o) => !o)} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-accent px-3 text-[11.5px] font-bold uppercase tracking-[0.12em] text-canvas hover:bg-accent-hover" aria-haspopup="menu" aria-expanded={open}>
         <Plus className="size-3.5" /> <span className="hidden sm:inline">Create</span>
       </button>
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div role="menu" className="absolute right-0 z-40 mt-1 w-48 animate-rise rounded-lg border border-line bg-paper p-1 shadow-pop">
+          <div role="menu" className="absolute right-0 z-40 mt-1 w-48 animate-rise rounded-lg border border-line bg-surface p-1 shadow-pop">
             {items.map((i) => (
-              <button key={i.to} role="menuitem" onClick={() => { setOpen(false); nav(i.to) }} className="block w-full rounded px-3 py-2 text-left text-[13px] hover:bg-ivory">
+              <button key={i.to} role="menuitem" onClick={() => { setOpen(false); nav(i.to) }} className="block w-full rounded px-3 py-2 text-left text-[13px] hover:bg-canvas">
                 {i.label}
               </button>
             ))}
@@ -229,9 +222,9 @@ function NotificationBell() {
   const q = useQuery({ queryKey: ['notifications', 'count'], queryFn: () => api.get<{ unread: number }>('/api/notifications/count'), refetchInterval: 120_000 })
   const n = q.data?.unread ?? 0
   return (
-    <NavLink to="/notifications" className="relative inline-flex size-8 items-center justify-center rounded-md text-ink-2 hover:bg-porcelain" aria-label={`Notifications${n ? `, ${n} unread` : ''}`}>
+    <NavLink to="/notifications" className="relative inline-flex size-8 items-center justify-center rounded-md text-ink-2 hover:bg-subtle" aria-label={`Notifications${n ? `, ${n} unread` : ''}`}>
       <Bell className="size-[17px]" strokeWidth={1.7} />
-      {n > 0 && <span className="absolute right-1 top-1 min-w-[15px] rounded-full bg-gold px-1 text-center font-mono text-[9.5px] leading-[15px] text-forest-700">{n > 99 ? '99+' : n}</span>}
+      {n > 0 && <span className="absolute right-1 top-1 min-w-[15px] rounded-full bg-ink px-1 text-center font-mono text-[9.5px] leading-[15px] text-canvas">{n > 99 ? '99+' : n}</span>}
     </NavLink>
   )
 }
@@ -255,7 +248,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
 
   return (
     <div className="flex h-dvh overflow-hidden">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:bg-paper focus:px-3 focus:py-2">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded focus:bg-surface focus:px-3 focus:py-2">
         Skip to content
       </a>
       <div className="no-print hidden shrink-0 transition-[width] duration-200 md:block">
@@ -266,18 +259,18 @@ export function AppShell({ children }: { children?: ReactNode }) {
           <div className="absolute inset-0 bg-ink/40" onClick={() => setMobileOpen(false)} />
           <div className="relative h-full w-[240px] animate-rise">
             <Sidebar collapsed={false} mobile onNavigate={() => setMobileOpen(false)} />
-            <button onClick={() => setMobileOpen(false)} className="absolute right-2 top-3 text-paper/80" aria-label="Close menu">
+            <button onClick={() => setMobileOpen(false)} className="absolute right-2 top-3 text-ink/80" aria-label="Close menu">
               <X className="size-5" />
             </button>
           </div>
         </div>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="no-print flex h-14 shrink-0 items-center gap-3 border-b border-line bg-paper/80 px-4 backdrop-blur md:px-6">
-          <button className="-ml-1 inline-flex size-8 items-center justify-center rounded-md hover:bg-porcelain md:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+        <header className="no-print flex h-14 shrink-0 items-center gap-3 border-b border-line bg-canvas/85 px-4 backdrop-blur md:px-6">
+          <button className="-ml-1 inline-flex size-8 items-center justify-center rounded-md hover:bg-subtle md:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <Menu className="size-5" />
           </button>
-          <button onClick={() => setPaletteOpen(true)} aria-label="Search" className="flex h-8 min-w-0 items-center gap-2 rounded-md border border-line bg-ivory px-2.5 text-left text-[13px] text-muted hover:border-line-strong sm:w-full sm:max-w-[420px]">
+          <button onClick={() => setPaletteOpen(true)} aria-label="Search" className="flex h-8 min-w-0 items-center gap-2 rounded-md border border-line bg-surface px-3 text-left text-[13px] text-muted hover:border-line-strong rounded-full sm:w-full sm:max-w-[420px]">
             <Search className="size-3.5 shrink-0" />
             <span className="hidden flex-1 truncate sm:block">Search projects, tasks, clients, people</span>
             <span className="hidden sm:inline-flex gap-0.5">

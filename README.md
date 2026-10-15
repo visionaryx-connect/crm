@@ -42,6 +42,7 @@ scripts/backup.sh --local && scripts/restore-drill.sh "$(ls -t backups/*.sql | h
 
 ## Documentation
 
+- [docs/WORKFLOW.md](docs/WORKFLOW.md) — **start here:** how clients, projects and tasks flow, who does what, and what is automated
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — Cloudflare setup, environments, CI, custom domain, free-tier limits
 - [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) — variables and secrets for development, staging and production
 - [docs/SECURITY.md](docs/SECURITY.md) — threat model, controls, what is and isn't covered

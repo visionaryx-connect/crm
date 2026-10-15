@@ -19,7 +19,7 @@ function LinkResult({ link, purpose, onClose }: { link: string; purpose: string;
   return (
     <Dialog open onClose={onClose} title={purpose === 'activation' ? 'Activation link' : 'Password reset link'} footer={<Button variant="primary" onClick={onClose}>Done</Button>}>
       <p className="mb-3 text-[13px] text-ink-2">Send this one-time link to the person through a trusted channel (it is shown only once and expires automatically). Verify their identity first for reset requests.</p>
-      <div className="flex items-center gap-2 rounded-md border border-line bg-ivory p-2"><code className="flex-1 break-all font-mono text-[12px]">{link}</code><IconButton label="Copy" onClick={() => { navigator.clipboard.writeText(link); toast({ tone: 'ok', title: 'Copied' }) }}><Copy className="size-4" /></IconButton></div>
+      <div className="flex items-center gap-2 rounded-md border border-line bg-canvas p-2"><code className="flex-1 break-all font-mono text-[12px]">{link}</code><IconButton label="Copy" onClick={() => { navigator.clipboard.writeText(link); toast({ tone: 'ok', title: 'Copied' }) }}><Copy className="size-4" /></IconButton></div>
     </Dialog>
   )
 }
@@ -89,11 +89,11 @@ function UsersTab({ roles }: { roles: Role[] }) {
           <Table>
             <thead><tr><Th>User</Th><Th>Roles</Th><Th>Status</Th><Th>2FA</Th><Th>Last sign-in</Th><Th /></tr></thead>
             <tbody>{rows.map((u) => (
-              <Tr key={u.id} className={focus === u.id ? 'bg-gold-100/40' : undefined}>
+              <Tr key={u.id} className={focus === u.id ? 'bg-highlight-soft/40' : undefined}>
                 <Td><span className="text-ink">{u.name}</span>{u.is_seed && <SampleTag />}<div className="text-[12px] text-muted">{u.email}{u.employee_code && ` · ${u.employee_code}`}</div></Td>
                 <Td><div className="flex flex-wrap gap-1">{u.roles.map((r) => <Badge key={r} tone="outline">{roles.find((x) => x.key === r)?.name ?? r}</Badge>)}</div></Td>
-                <Td>{u.status === 'active' ? (u.locked_until && Date.parse(u.locked_until) > Date.now() ? <Badge tone="warn">Locked</Badge> : <Badge tone="ok">Active</Badge>) : u.status === 'invited' ? <Badge tone="gold">Invited</Badge> : <Badge tone="danger">Deactivated</Badge>}</Td>
-                <Td>{u.mfa_enabled ? <Badge tone="forest">On</Badge> : <span className="text-[12px] text-faint">Off</span>}</Td>
+                <Td>{u.status === 'active' ? (u.locked_until && Date.parse(u.locked_until) > Date.now() ? <Badge tone="warn">Locked</Badge> : <Badge tone="ok">Active</Badge>) : u.status === 'invited' ? <Badge tone="highlight">Invited</Badge> : <Badge tone="danger">Deactivated</Badge>}</Td>
+                <Td>{u.mfa_enabled ? <Badge tone="accent">On</Badge> : <span className="text-[12px] text-faint">Off</span>}</Td>
                 <Td className="text-ink-2">{u.last_login_at ? relative(u.last_login_at) : 'Never'}{u.active_sessions > 0 && <span className="text-[11.5px] text-muted"> · {u.active_sessions} session(s)</span>}</Td>
                 <Td align="right" className="whitespace-nowrap">
                   {u.id !== me.user.id && can('users.manage') && (
@@ -162,13 +162,13 @@ function RolesTab({ data }: { data: RolesData }) {
   const cats = [...new Set(data.permissions.map((p) => p.category))]
   return (
     <Section title="Roles & permission matrix" description="Permissions are enforced by the server on every request and live connection; hiding a menu is never relied on." actions={can('roles.manage') && <Button size="sm" icon={<Plus className="size-3.5" />} onClick={() => setEdit(null)}>New role</Button>}>
-      <div className="overflow-x-auto rounded-lg border border-line bg-paper">
+      <div className="overflow-x-auto rounded-lg border border-line bg-surface">
         <table className="w-full border-collapse text-[12.5px]">
           <thead>
             <tr>
-              <th className="sticky left-0 border-b border-line bg-ivory px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">Permission</th>
+              <th className="sticky left-0 border-b border-line bg-canvas px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">Permission</th>
               {data.roles.map((r) => (
-                <th key={r.id} className="min-w-[96px] border-b border-l border-line bg-ivory px-2 py-2 text-center align-bottom">
+                <th key={r.id} className="min-w-[96px] border-b border-l border-line bg-canvas px-2 py-2 text-center align-bottom">
                   <button disabled={!can('roles.manage') || r.key === 'super_admin'} onClick={() => setEdit(r)} className="text-[12px] font-medium text-ink enabled:hover:underline">{r.name}</button>
                   <div className="text-[10.5px] font-normal text-muted">{r.user_count} user(s){r.requires_mfa ? ' · 2FA' : ''}</div>
                 </th>
@@ -177,11 +177,11 @@ function RolesTab({ data }: { data: RolesData }) {
           </thead>
           <tbody>
             {cats.map((c) => [
-              <tr key={c}><td colSpan={data.roles.length + 1} className="bg-porcelain/50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-gold-700">{c}</td></tr>,
+              <tr key={c}><td colSpan={data.roles.length + 1} className="bg-subtle/50 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-highlight-ink">{c}</td></tr>,
               ...data.permissions.filter((p) => p.category === c).map((p) => (
                 <tr key={p.key} className="border-b border-line/50">
-                  <td className="sticky left-0 bg-paper px-3 py-1.5 text-ink-2">{p.label}</td>
-                  {data.roles.map((r) => <td key={r.id} className="border-l border-line/50 text-center">{r.permissions.includes(p.key) ? <span className="text-forest" aria-label="Granted">●</span> : <span className="text-line-strong" aria-label="Not granted">·</span>}</td>)}
+                  <td className="sticky left-0 bg-surface px-3 py-1.5 text-ink-2">{p.label}</td>
+                  {data.roles.map((r) => <td key={r.id} className="border-l border-line/50 text-center">{r.permissions.includes(p.key) ? <span className="text-accent" aria-label="Granted">●</span> : <span className="text-line-strong" aria-label="Not granted">·</span>}</td>)}
                 </tr>
               )),
             ])}

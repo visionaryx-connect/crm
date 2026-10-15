@@ -10,7 +10,7 @@ import { fmtDate, fmtWeekday, relative, todayIST } from '@/lib/format'
 import { Badge, Button, Dialog, EmptyState, Field, Input, PageHeader, Panel, QueryState, Section, Select, Table, Tabs, Td, Textarea, Th, Tr, type Tone } from '@/components/ui'
 
 interface LeaveRow { id: string; user_id: string; user_name: string; type_name: string; start_date: string; end_date: string; half_day: string; days: number; reason: string; status: string; decided_by_name: string | null; decided_at: string | null; decision_note: string; created_at: string; department_name: string | null }
-const statusTone: Record<string, Tone> = { pending: 'gold', approved: 'ok', rejected: 'danger', cancelled: 'outline' }
+const statusTone: Record<string, Tone> = { pending: 'highlight', approved: 'ok', rejected: 'danger', cancelled: 'outline' }
 
 function RequestDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const types = useLeaveTypes()
@@ -30,9 +30,9 @@ function RequestDialog({ open, onClose }: { open: boolean; onClose: () => void }
         <Field label="From" error={errors.startDate}><Input type="date" value={v.startDate} onChange={(e) => setV({ ...v, startDate: e.target.value, endDate: e.target.value > v.endDate ? e.target.value : v.endDate })} /></Field>
         <Field label="To" error={errors.endDate}><Input type="date" value={v.endDate} min={v.startDate} onChange={(e) => setV({ ...v, endDate: e.target.value })} /></Field>
         <Field label="Half day" error={errors.halfDay}><Select value={v.halfDay} onChange={(e) => setV({ ...v, halfDay: e.target.value })} disabled={v.startDate !== v.endDate}><option value="none">Full day(s)</option><option value="first_half">First half</option><option value="second_half">Second half</option></Select></Field>
-        <div className="flex items-end"><p className="text-[13px] text-ink-2">Chargeable: <span className="font-display text-[20px] text-ink">{preview.data?.chargeable ?? '—'}</span> working day(s)</p></div>
+        <div className="flex items-end"><p className="text-[13px] text-ink-2">Chargeable: <span className="font-display font-bold tracking-[-0.02em] text-[20px] text-ink">{preview.data?.chargeable ?? '—'}</span> working day(s)</p></div>
         {preview.data && preview.data.days.some((d) => !d.working) && (
-          <div className="sm:col-span-2 rounded-md bg-sage/60 px-3 py-2 text-[12.5px] text-forest-700">
+          <div className="sm:col-span-2 rounded-md bg-track/60 px-3 py-2 text-[12.5px] text-accent-strong">
             Not charged: {preview.data.days.filter((d) => !d.working).map((d) => `${fmtWeekday(d.date)}${d.label ? ` (${d.label})` : ''}`).join(', ')}
           </div>
         )}
@@ -98,7 +98,7 @@ export default function Leave() {
                   {rows.map((b) => (
                     <Panel key={b.leave_type_id} className="p-4">
                       <div className="flex items-baseline justify-between"><span className="text-[12.5px] text-ink-2">{b.name}</span><span className="font-mono text-[10.5px] text-muted">{b.code}</span></div>
-                      <div className="mt-2 font-display text-[28px] leading-none tabular">{b.remaining ?? '—'}</div>
+                      <div className="mt-2 font-display font-bold tracking-[-0.02em] text-[28px] leading-none tabular">{b.remaining ?? '—'}</div>
                       <div className="mt-1.5 text-[11.5px] text-muted">{b.allocated == null ? 'Not balance-tracked' : `of ${Number(b.allocated) + Number(b.adjustment)} · used ${b.used}${b.pending ? ` · ${b.pending} pending` : ''}`}</div>
                     </Panel>
                   ))}

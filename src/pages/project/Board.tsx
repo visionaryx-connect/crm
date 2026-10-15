@@ -9,8 +9,18 @@ import { DueText, PriorityMark } from '@/components/status'
 import { useToast } from '@/components/toast'
 import type { TaskRow } from './types'
 
+/** One-line meaning of each column, shown under its title. */
+const COLUMN_HINT: Record<string, string> = {
+  backlog: 'Not scheduled yet',
+  todo: 'Assigned · ready to start',
+  in_progress: 'Being worked on',
+  blocked: 'Stuck · needs help',
+  in_review: 'Submitted · awaiting approval',
+  completed: 'Approved · counts in progress',
+}
+
 const columnAccent: Record<string, string> = {
-  backlog: 'bg-line-strong', todo: 'bg-ink-2/40', in_progress: 'bg-forest', blocked: 'bg-danger', in_review: 'bg-info', completed: 'bg-ok',
+  backlog: 'bg-line-strong', todo: 'bg-ink-2/40', in_progress: 'bg-accent', blocked: 'bg-danger', in_review: 'bg-info', completed: 'bg-ok',
 }
 
 /**
@@ -90,13 +100,16 @@ export function Board({ tasks, projectId, canManage, onNew }: { tasks: TaskRow[]
                 onDragOver={(e) => { e.preventDefault(); setOver(col) }}
                 onDragLeave={() => setOver((o) => (o === col ? null : o))}
                 onDrop={(e) => { e.preventDefault(); onDrop(col, null) }}
-                className={cx('flex min-h-[420px] flex-col rounded-lg border bg-porcelain/50 transition-colors', over === col ? 'border-forest/50 bg-forest-50' : 'border-line')}
+                className={cx('flex min-h-[420px] flex-col rounded-lg border bg-subtle/50 transition-colors', over === col ? 'border-accent/50 bg-accent-faint' : 'border-line')}
               >
-                <header className="flex items-center gap-2 px-3 py-2.5">
-                  <span className={cx('size-2 rounded-full', columnAccent[col])} aria-hidden />
-                  <h3 className="text-[12px] font-semibold uppercase tracking-[0.06em] text-ink-2">{TASK_STATUS_LABEL[col]}</h3>
-                  <span className="ml-auto font-mono text-[11px] text-muted">{list.length}</span>
-                  {col === 'todo' && canManage && <button onClick={onNew} className="text-muted hover:text-forest" aria-label="Add task"><Plus className="size-3.5" /></button>}
+                <header className="px-3 pb-2 pt-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className={cx('size-2 rounded-full', columnAccent[col])} aria-hidden />
+                    <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink">{TASK_STATUS_LABEL[col]}</h3>
+                    <span className="ml-auto font-mono text-[11px] text-muted">{list.length}</span>
+                    {col === 'todo' && canManage && <button onClick={onNew} className="text-muted hover:text-ink" aria-label="Add task"><Plus className="size-3.5" /></button>}
+                  </div>
+                  <p className="mt-0.5 pl-4 text-[11px] text-faint">{COLUMN_HINT[col]}</p>
                 </header>
                 <ol className="flex-1 space-y-2 px-2 pb-2">
                   {list.map((t) => (
@@ -107,7 +120,7 @@ export function Board({ tasks, projectId, canManage, onNew }: { tasks: TaskRow[]
                       onDragEnd={() => { setDragId(null); setOver(null) }}
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => { e.preventDefault(); e.stopPropagation(); onDrop(col, t.id) }}
-                      className={cx('group cursor-grab rounded-md border bg-paper p-2.5 shadow-soft transition active:cursor-grabbing', dragId === t.id ? 'opacity-40' : 'border-line hover:border-line-strong', t.overdue && 'border-l-2 border-l-danger')}
+                      className={cx('group cursor-grab rounded-md border bg-surface p-2.5 shadow-soft transition active:cursor-grabbing', dragId === t.id ? 'opacity-40' : 'border-line hover:border-line-strong', t.overdue && 'border-l-2 border-l-danger')}
                     >
                       <Link to={`/tasks/${t.id}`} className="block focus:outline-none" draggable={false}>
                         <div className="flex items-start gap-1.5">

@@ -13,6 +13,7 @@ import { diff, many, nowIso, one, patchColumns, placeholders } from '../lib/db'
 import { ApiError, body, clientIp, conflict, forbidden, notFound, query } from '../lib/http'
 import { requireStaff } from '../lib/session'
 import { notify, projectReviewers } from '../services/notify'
+import { onTaskAssigned } from '../services/automations'
 import { recalcProgress } from '../services/progress'
 import { publish, rooms } from '../services/realtime'
 
@@ -150,6 +151,7 @@ tasks.post('/', async (c) => {
     c.env.DB.prepare('INSERT INTO task_status_history (id, task_id, project_id, from_status, to_status, note, changed_by, changed_at) VALUES (?, ?, ?, NULL, ?, ?, ?, ?)').bind(newId('tsh'), id, input.projectId, input.status, 'Task created', a.userId, now),
     activity(c.env.DB, { actorId: a.userId, action: 'task.created', entityType: 'task', entityId: id, projectId: input.projectId, summary: `Created task #${num!.n} ${input.title}` }),
   ])
+  if (input.responsibleId) await onTaskAssigned(c.env, c.executionCtx, id)
   await recalcProgress(c.env, c.executionCtx, input.projectId)
   const recipients = [...(input.responsibleId ? [input.responsibleId] : []), ...assignees]
   await notify(c.env, c.executionCtx, recipients.map((u) => ({ userId: u, kind: 'task_assigned' as const, title: `New task: ${input.title}`, body: `${access.project.reference} · ${input.dueDate ? `due ${input.dueDate}` : 'no due date'}`, link: `/tasks/${id}`, entityType: 'task', entityId: id })), a.userId)
@@ -250,7 +252,8 @@ tasks.patch('/:id', async (c) => {
   if (changes.due_date) parts.push(`due ${changes.due_date.from ?? '—'} → ${changes.due_date.to ?? '—'}`)
   stmts.push(activity(c.env.DB, { actorId: a.userId, action: 'task.updated', entityType: 'task', entityId: task.id, projectId: task.project_id, summary: `Updated task #${task.number}${parts.length ? ' · ' + parts.join(', ') : ''}`, changes, ip: clientIp(c) }))
   await c.env.DB.batch(stmts)
-  if (changes.weight || changes.estimate_hours || changes.milestone_id) await recalcProgress(c.env, c.executionCtx, task.project_id)
+  const autoMoved = changes.responsible_id && newResponsible ? await onTaskAssigned(c.env, c.executionCtx, task.id) : false
+  if (autoMoved || changes.weight || changes.estimate_hours || changes.milestone_id) await recalcProgress(c.env, c.executionCtx, task.project_id)
 
   const newlyAssigned = [
     ...(changes.responsible_id && newResponsible ? [newResponsible] : []),
@@ -437,6 +440,7 @@ tasks.post('/bulk', async (c) => {
     stmts.push(activity(c.env.DB, { actorId: a.userId, action: 'task.bulk_updated', entityType: 'project', entityId: pid, projectId: pid, summary: `Bulk ${input.action.replace('_', ' ')} on ${rows.filter((r) => r.project_id === pid).length} task(s)` }))
   }
   await c.env.DB.batch(stmts)
+  if (input.action === 'assign' && input.responsibleId) for (const t of rows) await onTaskAssigned(c.env, c.executionCtx, t.id)
   for (const pid of projectsTouched) await recalcProgress(c.env, c.executionCtx, pid)
   if (input.action === 'assign' && input.responsibleId) {
     await notify(c.env, c.executionCtx, [{ userId: input.responsibleId, kind: 'task_assigned', title: `${rows.length} task(s) assigned to you`, link: '/tasks?mine=1' }], a.userId)

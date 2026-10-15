@@ -10,11 +10,13 @@ export const cx = (...c: (string | false | null | undefined)[]) => c.filter(Bool
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'quiet'
 const variants: Record<Variant, string> = {
-  primary: 'bg-forest text-paper hover:bg-forest-600 active:bg-forest-700 shadow-soft',
-  secondary: 'bg-paper text-ink border border-line-strong hover:border-ink-2/40 hover:bg-white',
-  ghost: 'text-ink-2 hover:bg-porcelain hover:text-ink',
-  quiet: 'text-forest hover:bg-forest-50',
-  danger: 'bg-paper text-danger border border-danger/30 hover:bg-danger-bg',
+  // Ivory pill with uppercase letter-spaced label — the site's "BOOK A GROWTH CALL" button.
+  primary: 'bg-accent text-canvas font-bold uppercase tracking-[0.12em] text-[12px]! hover:bg-accent-hover active:bg-accent-strong',
+  // Outlined pill — the site's "SEE THE WORK" button.
+  secondary: 'border border-ink/25 text-ink hover:border-ink/60 hover:bg-subtle',
+  ghost: 'text-ink-2 hover:bg-subtle hover:text-ink',
+  quiet: 'text-ink underline-offset-4 hover:underline',
+  danger: 'border border-danger/40 text-danger hover:bg-danger-bg',
 }
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -31,8 +33,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type}
       disabled={disabled || loading}
       className={cx(
-        'inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap transition-colors duration-100 disabled:opacity-50 disabled:pointer-events-none select-none',
-        size === 'sm' ? 'h-7 px-2.5 text-[12.5px]' : 'h-9 px-3.5 text-[13.5px]',
+        'inline-flex items-center justify-center gap-1.5 rounded-full font-medium whitespace-nowrap transition-colors duration-100 disabled:opacity-50 disabled:pointer-events-none select-none',
+        size === 'sm' ? 'h-7 px-3 text-[12.5px]' : 'h-9 px-4 text-[13.5px]',
         variants[variant],
         className,
       )}
@@ -46,7 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
 export function IconButton({ label, children, className, ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string }) {
   return (
-    <button type="button" aria-label={label} title={label} className={cx('inline-flex size-8 items-center justify-center rounded-md text-ink-2 hover:bg-porcelain hover:text-ink transition-colors', className)} {...rest}>
+    <button type="button" aria-label={label} title={label} className={cx('inline-flex size-8 items-center justify-center rounded-md text-ink-2 hover:bg-subtle hover:text-ink transition-colors', className)} {...rest}>
       {children}
     </button>
   )
@@ -56,7 +58,7 @@ export function IconButton({ label, children, className, ...rest }: ButtonHTMLAt
 
 /** Base control styles. Full width unless the caller sets an explicit width class. */
 const controlCls = (className?: string) => (/(^|\s)!?(w-|max-w-|min-w-)/.test(className ?? '') ? control : `w-full ${control}`)
-const control = 'rounded-md border border-line-strong bg-paper px-3 text-[13.5px] text-ink placeholder:text-faint transition-colors hover:border-ink-2/35 focus:border-forest focus:outline-none focus:ring-2 focus:ring-forest/15 disabled:bg-porcelain disabled:text-muted aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger/10'
+const control = 'rounded-md border border-line-strong bg-surface px-3 text-[13.5px] text-ink placeholder:text-faint transition-colors hover:border-ink-2/35 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 disabled:bg-subtle disabled:text-muted aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger/10'
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...rest }, ref) {
   return <input ref={ref} className={cx(controlCls(className), 'h-9', className)} {...rest} />
@@ -68,7 +70,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select({ className, children, ...rest }, ref) {
   return (
-    <select ref={ref} className={cx(controlCls(className), 'h-9 pr-8 appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 fill=%27none%27 stroke=%27%23767a74%27 stroke-width=%271.6%27%3E%3Cpath d=%27M3 4.5l3 3 3-3%27/%3E%3C/svg%3E")] bg-[right_10px_center] bg-no-repeat', className)} {...rest}>
+    <select ref={ref} className={cx(controlCls(className), 'h-9 pr-8 appearance-none bg-[url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 fill=%27none%27 stroke=%27%238d8b88%27 stroke-width=%271.6%27%3E%3Cpath d=%27M3 4.5l3 3 3-3%27/%3E%3C/svg%3E")] bg-[right_10px_center] bg-no-repeat', className)} {...rest}>
       {children}
     </select>
   )
@@ -79,7 +81,7 @@ export function Field({ label, hint, error, children, className, required, htmlF
     <div className={cx('flex flex-col gap-1.5', className)}>
       <label htmlFor={htmlFor} className="text-[12.5px] font-medium text-ink-2">
         {label}
-        {required && <span className="text-gold-700"> *</span>}
+        {required && <span className="text-highlight-ink"> *</span>}
       </label>
       {children}
       {error ? (
@@ -97,7 +99,7 @@ export function Checkbox({ label, description, ...rest }: InputHTMLAttributes<HT
   const id = useId()
   return (
     <label htmlFor={id} className="flex items-start gap-2.5 cursor-pointer select-none">
-      <input id={id} type="checkbox" className="mt-0.5 size-4 rounded border-line-strong accent-forest" {...rest} />
+      <input id={id} type="checkbox" className="mt-0.5 size-4 rounded border-line-strong accent-accent" {...rest} />
       <span>
         <span className="text-[13.5px] text-ink">{label}</span>
         {description && <span className="block text-[12px] text-muted">{description}</span>}
@@ -108,11 +110,11 @@ export function Checkbox({ label, description, ...rest }: InputHTMLAttributes<HT
 
 // ───────── Display ─────────
 
-export type Tone = 'neutral' | 'forest' | 'gold' | 'ok' | 'warn' | 'danger' | 'info' | 'outline'
+export type Tone = 'neutral' | 'accent' | 'highlight' | 'ok' | 'warn' | 'danger' | 'info' | 'outline'
 const tones: Record<Tone, string> = {
-  neutral: 'bg-porcelain text-ink-2',
-  forest: 'bg-forest-100 text-forest-700',
-  gold: 'bg-gold-100 text-gold-700',
+  neutral: 'bg-subtle text-ink-2',
+  accent: 'bg-accent-soft text-ink',
+  highlight: 'border border-ink/20 text-ink-2',
   ok: 'bg-ok-bg text-ok',
   warn: 'bg-warn-bg text-warn',
   danger: 'bg-danger-bg text-danger',
@@ -137,11 +139,11 @@ export function SampleTag() {
   )
 }
 
-export function Progress({ value, tone = 'forest', className, label }: { value: number; tone?: 'forest' | 'gold' | 'danger'; className?: string; label?: string }) {
+export function Progress({ value, tone = 'accent', className, label }: { value: number; tone?: 'accent' | 'highlight' | 'danger'; className?: string; label?: string }) {
   const v = Math.max(0, Math.min(100, value))
   return (
-    <div className={cx('h-1.5 w-full overflow-hidden rounded-full bg-sage', className)} role="progressbar" aria-valuenow={v} aria-valuemin={0} aria-valuemax={100} aria-label={label ?? 'Progress'}>
-      <div className={cx('h-full rounded-full transition-[width] duration-500', tone === 'gold' ? 'bg-gold' : tone === 'danger' ? 'bg-danger' : 'bg-forest')} style={{ width: `${v}%` }} />
+    <div className={cx('h-1.5 w-full overflow-hidden rounded-full bg-track', className)} role="progressbar" aria-valuenow={v} aria-valuemin={0} aria-valuemax={100} aria-label={label ?? 'Progress'}>
+      <div className={cx('h-full rounded-full transition-[width] duration-500', tone === 'highlight' ? 'bg-highlight' : tone === 'danger' ? 'bg-danger' : 'bg-accent')} style={{ width: `${v}%` }} />
     </div>
   )
 }
@@ -149,8 +151,8 @@ export function Progress({ value, tone = 'forest', className, label }: { value: 
 export function Avatar({ name, color, size = 28, className }: { name?: string | null; color?: string | null; size?: number; className?: string }) {
   return (
     <span
-      className={cx('inline-flex shrink-0 items-center justify-center rounded-full font-medium text-paper ring-2 ring-paper', className)}
-      style={{ width: size, height: size, fontSize: size * 0.38, background: color ?? '#5B6B4E' }}
+      className={cx('inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white ring-2 ring-canvas', className)}
+      style={{ width: size, height: size, fontSize: size * 0.38, background: color ?? '#3a3a3a' }}
       title={name ?? undefined}
       aria-hidden
     >
@@ -160,7 +162,7 @@ export function Avatar({ name, color, size = 28, className }: { name?: string | 
 }
 
 export function Kbd({ children }: { children: ReactNode }) {
-  return <kbd className="rounded border border-line-strong bg-paper px-1 font-mono text-[10.5px] text-muted">{children}</kbd>
+  return <kbd className="rounded border border-line-strong bg-surface px-1 font-mono text-[10.5px] text-muted">{children}</kbd>
 }
 
 // ───────── Layout primitives ─────────
@@ -171,7 +173,7 @@ export function PageHeader({ eyebrow, title, meta, actions, children }: { eyebro
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           {eyebrow && <div className="eyebrow mb-1.5">{eyebrow}</div>}
-          <h1 className="font-display text-[28px] leading-[1.15] font-[480] tracking-[-0.01em] text-ink" style={{ fontVariationSettings: '"opsz" 72' }}>
+          <h1 className="display text-[30px] text-ink sm:text-[34px]">
             {title}
           </h1>
           {meta && <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">{meta}</div>}
@@ -189,7 +191,7 @@ export function Section({ title, description, actions, children, className }: { 
       {(title || actions) && (
         <div className="mb-3 flex items-end justify-between gap-3">
           <div>
-            {title && <h2 className="text-[13px] font-semibold uppercase tracking-[0.06em] text-ink-2">{title}</h2>}
+            {title && <h2 className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-2">{title}</h2>}
             {description && <p className="mt-0.5 text-[12.5px] text-muted">{description}</p>}
           </div>
           {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -201,7 +203,7 @@ export function Section({ title, description, actions, children, className }: { 
 }
 
 export function Panel({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx('rounded-lg border border-line bg-paper', className)}>{children}</div>
+  return <div className={cx('rounded-lg border border-line bg-surface', className)}>{children}</div>
 }
 
 export function KeyValue({ items, cols = 2 }: { items: { label: ReactNode; value: ReactNode }[]; cols?: 1 | 2 | 3 | 4 }) {
@@ -220,12 +222,12 @@ export function KeyValue({ items, cols = 2 }: { items: { label: ReactNode; value
 /** An inline ledger of figures separated by hairlines — the house alternative to big metric cards. */
 export function StatStrip({ stats }: { stats: { label: string; value: ReactNode; tone?: 'danger' | 'warn' | 'ok'; hint?: string; to?: string }[] }) {
   return (
-    <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-line bg-paper sm:grid-cols-3 lg:grid-flow-col lg:auto-cols-fr lg:grid-cols-none">
+    <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-line bg-surface sm:grid-cols-3 lg:grid-flow-col lg:auto-cols-fr lg:grid-cols-none">
       {stats.map((s, i) => {
         const inner = (
           <>
-            <div className="text-[11.5px] uppercase tracking-[0.07em] text-muted">{s.label}</div>
-            <div className={cx('mt-1 font-display text-[26px] leading-none tabular', s.tone === 'danger' ? 'text-danger' : s.tone === 'warn' ? 'text-warn' : 'text-ink')} style={{ fontVariationSettings: '"opsz" 48' }}>
+            <div className="text-[10.5px] uppercase tracking-[0.14em] text-muted">{s.label}</div>
+            <div className={cx('mt-1 font-display text-[28px] font-bold leading-none tracking-[-0.02em] tabular', s.tone === 'danger' ? 'text-danger' : s.tone === 'warn' ? 'text-warn' : 'text-ink')}>
               {s.value ?? <span className="text-faint">—</span>}
             </div>
             {s.hint && <div className="mt-1 text-[11.5px] text-muted">{s.hint}</div>}
@@ -233,7 +235,7 @@ export function StatStrip({ stats }: { stats: { label: string; value: ReactNode;
         )
         const cls = 'block border-line px-4 py-3.5 [&:not(:last-child)]:border-r border-b lg:border-b-0'
         return s.to ? (
-          <Link key={i} to={s.to} className={cx(cls, 'hover:bg-ivory transition-colors')}>
+          <Link key={i} to={s.to} className={cx(cls, 'hover:bg-canvas transition-colors')}>
             {inner}
           </Link>
         ) : (
@@ -268,7 +270,7 @@ export function SkeletonRows({ rows = 6 }: { rows?: number }) {
 
 export function EmptyState({ icon, title, body, action }: { icon?: ReactNode; title: string; body?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-line-strong bg-paper/60 px-6 py-12 text-center">
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-line-strong bg-surface/60 px-6 py-12 text-center">
       <div className="mb-3 text-faint">{icon ?? <Inbox className="size-7" strokeWidth={1.4} />}</div>
       <p className="font-medium text-ink">{title}</p>
       {body && <p className="mt-1 max-w-md text-[13px] text-muted">{body}</p>}
@@ -341,10 +343,10 @@ export function Dialog({ open, onClose, title, description, children, footer, wi
       style={{ maxWidth: width }}
     >
       {open && (
-        <div className="flex max-h-[88vh] flex-col overflow-hidden rounded-lg border border-line bg-paper shadow-pop">
+        <div className="flex max-h-[88vh] flex-col overflow-hidden rounded-lg border border-line bg-surface shadow-pop">
           <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
             <div>
-              <h2 className="font-display text-[19px] leading-tight text-ink">{title}</h2>
+              <h2 className="font-display text-[19px] font-semibold leading-tight tracking-[-0.01em] text-ink">{title}</h2>
               {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
             </div>
             <IconButton label="Close" onClick={onClose} className="-mr-1.5 -mt-1">
@@ -352,7 +354,7 @@ export function Dialog({ open, onClose, title, description, children, footer, wi
             </IconButton>
           </div>
           <div className="overflow-y-auto px-5 py-4">{children}</div>
-          {footer && <div className="flex justify-end gap-2 border-t border-line bg-ivory/60 px-5 py-3">{footer}</div>}
+          {footer && <div className="flex justify-end gap-2 border-t border-line bg-canvas/60 px-5 py-3">{footer}</div>}
         </div>
       )}
     </dialog>
@@ -400,11 +402,11 @@ export function Tabs<T extends string>({ value, onChange, tabs }: { value: T; on
           onClick={() => onChange(t.value)}
           className={cx(
             'relative whitespace-nowrap px-3 py-2.5 text-[13px] font-medium transition-colors',
-            t.value === value ? 'text-ink after:absolute after:inset-x-2 after:bottom-0 after:h-[2px] after:rounded-full after:bg-forest' : 'text-muted hover:text-ink',
+            t.value === value ? 'text-ink after:absolute after:inset-x-2 after:bottom-0 after:h-[2px] after:rounded-full after:bg-accent' : 'text-muted hover:text-ink',
           )}
         >
           {t.label}
-          {t.count != null && t.count > 0 && <span className="ml-1.5 rounded bg-porcelain px-1 font-mono text-[10.5px] text-ink-2">{t.count}</span>}
+          {t.count != null && t.count > 0 && <span className="ml-1.5 rounded bg-subtle px-1 font-mono text-[10.5px] text-ink-2">{t.count}</span>}
         </button>
       ))}
     </div>
@@ -415,14 +417,14 @@ export function Tabs<T extends string>({ value, onChange, tabs }: { value: T; on
 
 export function Table({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cx('overflow-x-auto rounded-lg border border-line bg-paper', className)}>
+    <div className={cx('overflow-x-auto rounded-lg border border-line bg-surface', className)}>
       <table className="w-full border-collapse text-left text-[13px]">{children}</table>
     </div>
   )
 }
 export function Th({ children, className, align }: { children?: ReactNode; className?: string; align?: 'right' | 'center' }) {
   return (
-    <th scope="col" className={cx('border-b border-line bg-ivory/70 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.07em] text-muted whitespace-nowrap', align === 'right' && 'text-right', align === 'center' && 'text-center', className)}>
+    <th scope="col" className={cx('border-b border-line bg-surface px-3 py-2 text-[10.5px] font-medium uppercase tracking-[0.14em] text-muted whitespace-nowrap', align === 'right' && 'text-right', align === 'center' && 'text-center', className)}>
       {children}
     </th>
   )
@@ -435,11 +437,33 @@ export function Td({ children, className, align, colSpan }: { children?: ReactNo
   )
 }
 export const Tr = ({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) => (
-  <tr onClick={onClick} className={cx('last:[&>td]:border-b-0 transition-colors', onClick && 'cursor-pointer hover:bg-ivory/80', className)}>
+  <tr onClick={onClick} className={cx('last:[&>td]:border-b-0 transition-colors', onClick && 'cursor-pointer hover:bg-canvas/80', className)}>
     {children}
   </tr>
 )
 
 export function Spinner({ className }: { className?: string }) {
   return <Loader2 className={cx('size-4 animate-spin text-muted', className)} aria-label="Loading" />
+}
+
+/** Visionary X mark: the moon orb with its small "X" badge, drawn in CSS (no external asset). */
+export function BrandMark({ size = 28, className }: { size?: number; className?: string }) {
+  return (
+    <span className={cx('relative inline-block shrink-0', className)} style={{ width: size, height: size }} aria-hidden>
+      <span className="absolute inset-0 rounded-full" style={{ background: 'radial-gradient(circle at 34% 30%, #ffffff 0%, #e9e8e4 38%, #a9a8a4 72%, #5c5b58 100%)', boxShadow: '0 0 18px rgb(251 250 247 / 0.12)' }} />
+      <span className="absolute flex items-center justify-center rounded-full bg-canvas text-ink" style={{ width: size * 0.36, height: size * 0.36, right: size * 0.04, top: size * 0.08, fontSize: size * 0.2, fontWeight: 700, lineHeight: 1 }}>X</span>
+    </span>
+  )
+}
+
+export function BrandLockup({ size = 28, sub }: { size?: number; sub?: string }) {
+  return (
+    <span className="flex items-center gap-2.5">
+      <BrandMark size={size} />
+      <span className="leading-tight">
+        <span className="block font-display text-[16px] font-bold tracking-[-0.01em] text-ink">Visionary X</span>
+        {sub && <span className="block text-[9.5px] font-medium uppercase tracking-[0.2em] text-muted">{sub}</span>}
+      </span>
+    </span>
+  )
 }

@@ -10,6 +10,7 @@ import { activity } from '../lib/audit'
 import { newId } from '../lib/crypto'
 import { many, nowIso } from '../lib/db'
 import { pruneRateLimits } from '../lib/ratelimit'
+import { markDelayedProjects } from './automations'
 import { notify } from './notify'
 import type { Waiter } from './realtime'
 import { companyReport, projectReport } from './reports'
@@ -20,6 +21,7 @@ export const FILE_RETENTION_DAYS = 30
 export async function runScheduled(env: Env, waiter: Waiter, at: Date) {
   const today = localDate(at)
   await deadlineReminders(env, waiter, today)
+  await markDelayedProjects(env, waiter, today)
   await housekeeping(env, at)
   if (today.endsWith('-01')) await monthlySnapshots(env, today)
 }

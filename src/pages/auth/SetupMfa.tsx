@@ -27,7 +27,7 @@ export default function SetupMfa() {
       .post<{ secret: string; otpauthUri: string }>('/api/auth/mfa/setup')
       .then(async (s) => {
         setSetup(s)
-        setQr(await QRCode.toDataURL(s.otpauthUri, { margin: 1, width: 200, color: { dark: '#173b2c', light: '#fcfbf7' } }))
+        setQr(await QRCode.toDataURL(s.otpauthUri, { margin: 1, width: 200, color: { dark: '#0c0c0c', light: '#fbfaf7' } }))
       })
       .catch((e) => {
         if (e instanceof ApiError && (e.status === 401)) nav('/login', { replace: true })
@@ -54,7 +54,7 @@ export default function SetupMfa() {
   if (codes) {
     return (
       <AuthLayout title="Save your recovery codes" subtitle="Each code works once if you lose your device. Store them somewhere safe — they won’t be shown again.">
-        <ol className="grid grid-cols-2 gap-2 rounded-lg border border-line bg-paper p-4 font-mono text-[13.5px]">
+        <ol className="grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface p-4 font-mono text-[13.5px]">
           {codes.map((c) => <li key={c}>{c}</li>)}
         </ol>
         <div className="mt-4 flex gap-2">
@@ -79,7 +79,7 @@ export default function SetupMfa() {
                 {qr && <img src={qr} alt="QR code for authenticator setup" className="size-[150px] rounded border border-line" />}
                 <div className="min-w-0 text-[12px] text-muted">
                   Can’t scan? Enter this key:
-                  <code className="mt-1 block break-all rounded bg-porcelain px-2 py-1 font-mono text-[12px] text-ink">{setup.secret.replace(/(.{4})/g, '$1 ').trim()}</code>
+                  <code className="mt-1 block break-all rounded bg-subtle px-2 py-1 font-mono text-[12px] text-ink">{setup.secret.replace(/(.{4})/g, '$1 ').trim()}</code>
                 </div>
               </div>
             </li>

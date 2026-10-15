@@ -78,7 +78,7 @@ export default function MemberProfile() {
       <PageHeader
         eyebrow={<Link to="/team" className="hover:underline">Team · {m.employee_code}</Link>}
         title={<span className="flex items-center gap-4"><Avatar name={m.name} color={m.avatar_color} size={48} />{m.name}{m.is_seed && <SampleTag />}</span>}
-        meta={<><span>{m.designation || 'No designation'}</span><span>{m.department_name ?? 'No department'}</span>{m.roles.map((r) => <Badge key={r.key} tone="outline">{r.name}</Badge>)}{m.status !== 'active' && <Badge tone="gold">{m.status}</Badge>}</>}
+        meta={<><span>{m.designation || 'No designation'}</span><span>{m.department_name ?? 'No department'}</span>{m.roles.map((r) => <Badge key={r.key} tone="outline">{r.name}</Badge>)}{m.status !== 'active' && <Badge tone="highlight">{m.status}</Badge>}</>}
         actions={<>{d.permissions.canSeeWork && <Link to={`/reports?type=member&scopeId=${m.id}`}><Button icon={<BarChart3 className="size-4" />}>Monthly report</Button></Link>}{(d.permissions.canEdit || d.permissions.canEditSelf) && <Button icon={<Pencil className="size-4" />} onClick={() => setEditing(true)}>Edit profile</Button>}</>}
       />
       {d.work && (
@@ -99,7 +99,7 @@ export default function MemberProfile() {
               </Table>
             )}
           </Section>
-          {m.skills.length > 0 && <Section title="Skills"><div className="flex flex-wrap gap-1.5">{m.skills.map((s) => <Badge key={s} tone="forest">{s}</Badge>)}</div></Section>}
+          {m.skills.length > 0 && <Section title="Skills"><div className="flex flex-wrap gap-1.5">{m.skills.map((s) => <Badge key={s} tone="accent">{s}</Badge>)}</div></Section>}
         </div>
         <aside className="space-y-6">
           <Panel className="p-4"><KeyValue cols={1} items={[

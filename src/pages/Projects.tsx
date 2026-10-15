@@ -101,10 +101,10 @@ export default function Projects() {
           <option value="">All (not archived)</option>
           {PROJECT_STATUSES.map((s) => <option key={s} value={s}>{PROJECT_STATUS_LABEL[s]}</option>)}
         </Select>
-        <label className="ml-1 flex items-center gap-2 text-[13px] text-ink-2"><input type="checkbox" className="accent-forest" checked={mine} onChange={(e) => set('mine', e.target.checked ? '1' : null)} /> Only mine</label>
-        <div className="ml-auto flex rounded-md border border-line bg-paper p-0.5" role="group" aria-label="View">
-          <button className={cx('rounded px-2 py-1', view === 'table' && 'bg-porcelain')} onClick={() => setView('table')} aria-pressed={view === 'table'} aria-label="Table view"><LayoutList className="size-4" /></button>
-          <button className={cx('rounded px-2 py-1', view === 'cards' && 'bg-porcelain')} onClick={() => setView('cards')} aria-pressed={view === 'cards'} aria-label="Card view"><Rows3 className="size-4" /></button>
+        <label className="ml-1 flex items-center gap-2 text-[13px] text-ink-2"><input type="checkbox" className="accent-accent" checked={mine} onChange={(e) => set('mine', e.target.checked ? '1' : null)} /> Only mine</label>
+        <div className="ml-auto flex rounded-md border border-line bg-surface p-0.5" role="group" aria-label="View">
+          <button className={cx('rounded px-2 py-1', view === 'table' && 'bg-subtle')} onClick={() => setView('table')} aria-pressed={view === 'table'} aria-label="Table view"><LayoutList className="size-4" /></button>
+          <button className={cx('rounded px-2 py-1', view === 'cards' && 'bg-subtle')} onClick={() => setView('cards')} aria-pressed={view === 'cards'} aria-label="Card view"><Rows3 className="size-4" /></button>
         </div>
       </div>
       <QueryState q={list} empty={(d) => (d.length === 0 ? <EmptyState title="No projects here" body={can('projects.create') ? 'Start a project for a client to plan milestones and tasks.' : 'Projects you are added to will appear here.'} /> : null)}>
@@ -117,7 +117,7 @@ export default function Projects() {
                   <Tr key={p.id} onClick={() => nav(`/projects/${p.id}`)}>
                     <Td>
                       <div className="flex items-center gap-2"><PriorityMark priority={p.priority} /><Link to={`/projects/${p.id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-ink hover:underline">{p.name}</Link>{p.is_seed && <SampleTag />}</div>
-                      <div className="pl-5 text-[12px] text-muted"><span className="font-mono text-gold-700">{p.reference}</span> · {p.client_name} · {p.manager_name ?? 'No manager'}</div>
+                      <div className="pl-5 text-[12px] text-muted"><span className="font-mono text-highlight-ink">{p.reference}</span> · {p.client_name} · {p.manager_name ?? 'No manager'}</div>
                     </Td>
                     <Td><ProjectStatusBadge status={p.status} /></Td>
                     <Td><ProgressFigure value={p.progress} hasData={p.total_tasks > 0} compact /></Td>
@@ -136,8 +136,8 @@ export default function Projects() {
               {rows.map((p) => (
                 <Link key={p.id} to={`/projects/${p.id}`}>
                   <Panel className="h-full p-4 transition-colors hover:border-line-strong">
-                    <div className="flex items-start justify-between gap-2"><span className="font-mono text-[11px] text-gold-700">{p.reference}</span><ProjectStatusBadge status={p.status} /></div>
-                    <p className="mt-1.5 font-display text-[18px] leading-snug text-ink">{p.name}</p>
+                    <div className="flex items-start justify-between gap-2"><span className="font-mono text-[11px] text-highlight-ink">{p.reference}</span><ProjectStatusBadge status={p.status} /></div>
+                    <p className="mt-1.5 font-display font-bold tracking-[-0.02em] text-[18px] leading-snug text-ink">{p.name}</p>
                     <p className="text-[12.5px] text-muted">{p.client_name}</p>
                     <div className="mt-4"><ProgressFigure value={p.progress} hasData={p.total_tasks > 0} /></div>
                     <div className="mt-3 flex items-center justify-between text-[12px]"><HealthDot health={p.health} reasons={p.health_reasons} /><DueText date={p.target_date} /></div>

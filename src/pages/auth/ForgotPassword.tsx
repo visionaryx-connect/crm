@@ -25,7 +25,7 @@ export default function ForgotPassword() {
   return (
     <AuthLayout title="Reset your password" subtitle="For security, an administrator verifies every reset request and sends you a one-time link." footer={<Link to="/login" className="link">Back to sign in</Link>}>
       {message ? (
-        <p className="rounded-md border border-forest/20 bg-forest-50 px-3 py-3 text-[13.5px] text-forest-700">{message}</p>
+        <p className="rounded-md border border-accent/20 bg-accent-faint px-3 py-3 text-[13.5px] text-accent-strong">{message}</p>
       ) : (
         <form onSubmit={submit} className="space-y-4">
           <Field label="Work email" error={error ?? undefined} htmlFor="email">

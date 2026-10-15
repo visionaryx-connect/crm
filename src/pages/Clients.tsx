@@ -20,7 +20,7 @@ type ClientRow = {
   account_manager_name: string | null; active_projects: number; total_projects: number; open_feedback: number; next_deadline: string | null
 }
 
-const statusTone: Record<ClientStatus, Tone> = { lead: 'info', active: 'forest', on_hold: 'gold', inactive: 'neutral', archived: 'outline' }
+const statusTone: Record<ClientStatus, Tone> = { lead: 'info', active: 'accent', on_hold: 'highlight', inactive: 'neutral', archived: 'outline' }
 export const ClientStatusBadge = ({ status }: { status: ClientStatus }) => <Badge tone={statusTone[status]}>{CLIENT_STATUS_LABEL[status]}</Badge>
 
 type ClientForm = z.input<typeof clientSchema>
@@ -72,7 +72,7 @@ export function ClientDialog({ open, onClose, initial, clientId }: { open: boole
       }
     >
       <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submit(false) }}>
-        {dup && <div className="sm:col-span-2 rounded-md border border-gold/40 bg-gold-100/60 px-3 py-2 text-[13px] text-gold-700" role="alert">{dup} Check before creating a duplicate.</div>}
+        {dup && <div className="sm:col-span-2 rounded-md border border-highlight/40 bg-highlight-soft/60 px-3 py-2 text-[13px] text-highlight-ink" role="alert">{dup} Check before creating a duplicate.</div>}
         <Field label="Client name" required error={err.name?.message} className="sm:col-span-2"><Input autoFocus {...form.register('name')} aria-invalid={!!err.name} /></Field>
         <Field label="Organisation (legal name)" error={err.organization?.message}><Input {...form.register('organization')} /></Field>
         <Field label="Industry" error={err.industry?.message}><Input {...form.register('industry')} /></Field>
@@ -143,7 +143,7 @@ export default function Clients() {
                   <Td><ClientStatusBadge status={c.status} /></Td>
                   <Td className="text-ink-2">{c.account_manager_name ?? <span className="text-faint">Unassigned</span>}</Td>
                   <Td align="right" className="font-mono tabular">{c.active_projects}<span className="text-faint"> / {c.total_projects}</span></Td>
-                  <Td align="right">{c.open_feedback > 0 ? <Badge tone="gold">{c.open_feedback}</Badge> : <span className="text-faint">0</span>}</Td>
+                  <Td align="right">{c.open_feedback > 0 ? <Badge tone="highlight">{c.open_feedback}</Badge> : <span className="text-faint">0</span>}</Td>
                   <Td className="text-ink-2">{fmtDateShort(c.next_deadline)}</Td>
                 </Tr>
               ))}

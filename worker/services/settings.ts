@@ -29,6 +29,14 @@ export const SETTING_SCHEMAS = {
     reverifyMinutes: z.number().int().min(5).max(120),
   }),
   'reports.schedule': z.object({ monthlySnapshots: z.boolean() }),
+  'automations': z.object({
+    projectAutoStart: z.boolean(),
+    milestoneAutoStatus: z.boolean(),
+    dependencyReady: z.boolean(),
+    projectReadyForReview: z.boolean(),
+    projectAutoDelayed: z.boolean(),
+    assignedBacklogToTodo: z.boolean(),
+  }),
 } as const
 
 export type SettingKey = keyof typeof SETTING_SCHEMAS
@@ -41,6 +49,7 @@ const DEFAULTS: { [K in SettingKey]: SettingValue<K> } = {
   'holidays.regions': { regions: ['IN', 'IN-TN', 'COMPANY'] },
   'portal.defaults': { linkValidityDays: 30, sessionHours: 8, reverifyMinutes: 15 },
   'reports.schedule': { monthlySnapshots: true },
+  automations: { projectAutoStart: true, milestoneAutoStatus: true, dependencyReady: true, projectReadyForReview: true, projectAutoDelayed: true, assignedBacklogToTodo: true },
 }
 
 export async function getSetting<K extends SettingKey>(db: D1Database, key: K): Promise<SettingValue<K>> {

@@ -49,7 +49,7 @@ export default function VerifyMfa() {
           />
         </Field>
         <div className="flex items-center justify-between">
-          <button type="button" className="text-[13px] text-forest hover:underline" onClick={() => { setRecovery((r) => !r); setCode(''); setError(null) }}>
+          <button type="button" className="text-[13px] text-accent hover:underline" onClick={() => { setRecovery((r) => !r); setCode(''); setError(null) }}>
             {recovery ? 'Use authenticator code' : 'Use a recovery code'}
           </button>
           <Button type="submit" variant="primary" loading={busy} disabled={code.trim().length < 6}>Verify</Button>

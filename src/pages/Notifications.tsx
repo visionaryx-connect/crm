@@ -29,17 +29,17 @@ export default function Notifications() {
   return (
     <div>
       <PageHeader eyebrow="Inbox" title="Notifications" meta={q.data && <span>{q.data.unread} unread</span>} actions={<><Button variant="ghost" icon={<Settings2 className="size-4" />} onClick={() => setPrefs(true)}>Preferences</Button><Button icon={<CheckCheck className="size-4" />} onClick={() => markAll.mutate()} disabled={!q.data?.unread}>Mark all read</Button></>} />
-      <div className="mb-4 flex gap-1 rounded-md border border-line bg-paper p-0.5 text-[12.5px]" role="group" style={{ width: 'fit-content' }}>
-        <button className={cx('rounded px-3 py-1', !unread && 'bg-porcelain')} onClick={() => setUnread(false)} aria-pressed={!unread}>All</button>
-        <button className={cx('rounded px-3 py-1', unread && 'bg-porcelain')} onClick={() => setUnread(true)} aria-pressed={unread}>Unread</button>
+      <div className="mb-4 flex gap-1 rounded-md border border-line bg-surface p-0.5 text-[12.5px]" role="group" style={{ width: 'fit-content' }}>
+        <button className={cx('rounded px-3 py-1', !unread && 'bg-subtle')} onClick={() => setUnread(false)} aria-pressed={!unread}>All</button>
+        <button className={cx('rounded px-3 py-1', unread && 'bg-subtle')} onClick={() => setUnread(true)} aria-pressed={unread}>Unread</button>
       </div>
       <QueryState q={q} empty={(d) => (d.notifications.length === 0 ? <EmptyState icon={<Bell className="size-7" strokeWidth={1.4} />} title={unread ? 'No unread notifications' : 'No notifications yet'} /> : null)}>
         {(d) => (
-          <ul className="divide-y divide-line/70 rounded-lg border border-line bg-paper">
+          <ul className="divide-y divide-line/70 rounded-lg border border-line bg-surface">
             {d.notifications.map((n) => {
               const inner = (
                 <div className="flex items-start gap-3 px-4 py-3">
-                  <span className={cx('mt-1.5 size-2 shrink-0 rounded-full', n.read_at ? 'bg-transparent' : 'bg-gold')} aria-label={n.read_at ? undefined : 'Unread'} />
+                  <span className={cx('mt-1.5 size-2 shrink-0 rounded-full', n.read_at ? 'bg-transparent' : 'bg-highlight')} aria-label={n.read_at ? undefined : 'Unread'} />
                   <div className="min-w-0 flex-1">
                     <p className={cx('text-[13.5px]', n.read_at ? 'text-ink-2' : 'font-medium text-ink')}>{n.title}</p>
                     {n.body && <p className="mt-0.5 line-clamp-2 text-[12.5px] text-muted">{n.body}</p>}
@@ -48,7 +48,7 @@ export default function Notifications() {
                 </div>
               )
               return (
-                <li key={n.id} className="hover:bg-ivory/70">
+                <li key={n.id} className="hover:bg-canvas/70">
                   {n.link ? <Link to={n.link} onClick={() => !n.read_at && markOne.mutate(n.id)}>{inner}</Link> : <button className="w-full text-left" onClick={() => !n.read_at && markOne.mutate(n.id)}>{inner}</button>}
                 </li>
               )

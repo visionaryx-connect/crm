@@ -10,6 +10,7 @@ import { fmtDate, hours } from '@/lib/format'
 import { Avatar, Badge, Button, Dialog, EmptyState, ErrorState, Field, Input, KeyValue, PageHeader, Panel, Progress, SampleTag, Section, Select, SkeletonRows, Tabs, Textarea, cx } from '@/components/ui'
 import { DueText, HealthDot, PriorityMark, ProjectStatusBadge } from '@/components/status'
 import { TaskDialog } from '@/components/TaskDialog'
+import { GuideLink, NextStep, PROJECT_STEPS, projectGuidance, Stepper } from '@/components/Workflow'
 import { useToast } from '@/components/toast'
 import { Board } from './project/Board'
 import { TaskTable } from './project/TaskTable'
@@ -82,21 +83,31 @@ function Overview({ data, tasks }: { data: ProjectData; tasks: TaskRow[] }) {
   const stats = data.taskStats
   const order: TaskStatus[] = ['completed', 'in_review', 'in_progress', 'blocked', 'todo', 'backlog']
   const total = order.reduce((s, k) => s + (stats[k] ?? 0), 0)
-  const colors: Record<string, string> = { completed: 'bg-ok', in_review: 'bg-info', in_progress: 'bg-forest', blocked: 'bg-danger', todo: 'bg-ink-2/35', backlog: 'bg-line-strong' }
+  const colors: Record<string, string> = { completed: 'bg-ok', in_review: 'bg-info', in_progress: 'bg-accent', blocked: 'bg-danger', todo: 'bg-ink-2/35', backlog: 'bg-line-strong' }
   const overdue = tasks.filter((t) => t.overdue)
   const blocked = tasks.filter((t) => t.status === 'blocked')
   const effortPct = data.effort.estimatedHours ? Math.round((data.effort.loggedHours / data.effort.estimatedHours) * 100) : null
+  const ds = data.deliverableStats
+  const g = projectGuidance({
+    status: p.status, totalTasks: total, openTasks: ['backlog', 'todo', 'in_progress', 'in_review', 'blocked'].reduce((s, k) => s + (stats[k] ?? 0), 0),
+    pendingDeliverables: (ds.draft ?? 0) + (ds.in_review ?? 0) + (ds.changes_requested ?? 0), members: data.members.length, milestones: data.milestones.length, canManage: data.access.canManage,
+  })
   return (
+    <>
+    <section className="mb-8" aria-label="Project stage">
+      <Stepper steps={PROJECT_STEPS} current={g.current} warning={g.warning} />
+      <NextStep title={g.title} body={g.body} auto={g.auto} action={<GuideLink />} />
+    </section>
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
       <div className="min-w-0 space-y-8">
         <section className="grid gap-4 sm:grid-cols-2">
           <Panel className="p-5">
             <div className="flex items-baseline justify-between"><span className="eyebrow">Progress</span><span title={MODE_TEXT[p.progress_mode]} className="text-faint"><Info className="size-3.5" /></span></div>
-            <div className="mt-2 font-display text-[44px] leading-none tabular text-ink" style={{ fontVariationSettings: '"opsz" 96' }}>{p.total_tasks ? `${Math.round(p.progress)}%` : '—'}</div>
+            <div className="mt-2 font-display font-bold tracking-[-0.02em] text-[44px] leading-none tabular text-ink">{p.total_tasks ? `${Math.round(p.progress)}%` : '—'}</div>
             <p className="mt-2 text-[12px] text-muted">{p.total_tasks ? MODE_TEXT[p.progress_mode] : 'No tasks yet — progress appears once work is planned.'}</p>
             {total > 0 && (
               <>
-                <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-sage">{order.map((k) => (stats[k] ? <span key={k} className={colors[k]} style={{ width: `${(stats[k]! / total) * 100}%` }} title={`${TASK_STATUS_LABEL[k]}: ${stats[k]}`} /> : null))}</div>
+                <div className="mt-4 flex h-2 overflow-hidden rounded-full bg-track">{order.map((k) => (stats[k] ? <span key={k} className={colors[k]} style={{ width: `${(stats[k]! / total) * 100}%` }} title={`${TASK_STATUS_LABEL[k]}: ${stats[k]}`} /> : null))}</div>
                 <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-muted">{order.filter((k) => stats[k]).map((k) => <span key={k} className="inline-flex items-center gap-1"><span className={cx('size-1.5 rounded-full', colors[k])} />{TASK_STATUS_LABEL[k]} {stats[k]}</span>)}</div>
               </>
             )}
@@ -108,16 +119,16 @@ function Overview({ data, tasks }: { data: ProjectData; tasks: TaskRow[] }) {
             <div className="mt-4 border-t border-line pt-3">
               <span className="eyebrow">Effort</span>
               <p className="mt-1 text-[13px] text-ink-2">{hours(data.effort.loggedHours * 60)} logged of {data.effort.estimatedHours ? `${data.effort.estimatedHours} h estimated` : 'no estimates yet'}{data.effort.budgetHours != null && ` · budget ${data.effort.budgetHours} h`}</p>
-              {effortPct !== null && <Progress value={effortPct} tone={effortPct > 100 ? 'danger' : 'gold'} className="mt-2" label="Effort used" />}
+              {effortPct !== null && <Progress value={effortPct} tone={effortPct > 100 ? 'danger' : 'highlight'} className="mt-2" label="Effort used" />}
             </div>
           </Panel>
         </section>
 
         {(overdue.length > 0 || blocked.length > 0) && (
           <Section title="Needs attention">
-            <ul className="divide-y divide-line/70 rounded-lg border border-line bg-paper">
+            <ul className="divide-y divide-line/70 rounded-lg border border-line bg-surface">
               {[...blocked, ...overdue.filter((t) => t.status !== 'blocked')].slice(0, 8).map((t) => (
-                <li key={t.id}><Link to={`/tasks/${t.id}`} className="flex items-center gap-3 px-4 py-2.5 text-[13px] hover:bg-ivory/70">
+                <li key={t.id}><Link to={`/tasks/${t.id}`} className="flex items-center gap-3 px-4 py-2.5 text-[13px] hover:bg-canvas/70">
                   <PriorityMark priority={t.priority} />
                   <span className="flex-1 text-ink">{t.title}</span>
                   {t.status === 'blocked' ? <Badge tone="danger">Blocked{t.blocked_reason ? `: ${t.blocked_reason.slice(0, 40)}` : ''}</Badge> : <DueText date={t.due_date} />}
@@ -132,7 +143,7 @@ function Overview({ data, tasks }: { data: ProjectData; tasks: TaskRow[] }) {
           <Panel className="space-y-4 p-5 text-[13.5px] text-ink-2">
             <div><div className="eyebrow mb-1">Description</div><p className="whitespace-pre-wrap">{p.description || <span className="text-faint">No description.</span>}</p></div>
             <div><div className="eyebrow mb-1">Approved scope</div><p className="whitespace-pre-wrap">{p.scope || <span className="text-faint">Scope not recorded.</span>}</p></div>
-            <div><div className="eyebrow mb-1">Client sees</div><p className="rounded bg-gold-100/50 px-3 py-2 text-ink">{p.client_status_note || <span className="text-faint">No client-facing status yet.</span>}</p></div>
+            <div><div className="eyebrow mb-1">Client sees</div><p className="rounded bg-highlight-soft/50 px-3 py-2 text-ink">{p.client_status_note || <span className="text-faint">No client-facing status yet.</span>}</p></div>
           </Panel>
         </Section>
       </div>
@@ -157,6 +168,7 @@ function Overview({ data, tasks }: { data: ProjectData; tasks: TaskRow[] }) {
         </Panel>
       </aside>
     </div>
+    </>
   )
 }
 
@@ -216,7 +228,7 @@ export default function ProjectWorkspace() {
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <Select className="w-44" value={taskFilter.responsible} onChange={(e) => setTaskFilter({ ...taskFilter, responsible: e.target.value })} aria-label="Filter by person"><option value="">Everyone</option>{d.members.map((m) => <option key={m.user_id} value={m.user_id}>{m.name}</option>)}</Select>
           <Select className="w-48" value={taskFilter.milestone} onChange={(e) => setTaskFilter({ ...taskFilter, milestone: e.target.value })} aria-label="Filter by milestone"><option value="">All milestones</option>{d.milestones.map((m) => <option key={m.id} value={m.id}>{m.title}</option>)}</Select>
-          <label className="flex items-center gap-2 text-[13px] text-ink-2"><input type="checkbox" className="accent-forest" checked={taskFilter.showDone} onChange={(e) => setTaskFilter({ ...taskFilter, showDone: e.target.checked })} /> Show completed</label>
+          <label className="flex items-center gap-2 text-[13px] text-ink-2"><input type="checkbox" className="accent-accent" checked={taskFilter.showDone} onChange={(e) => setTaskFilter({ ...taskFilter, showDone: e.target.checked })} /> Show completed</label>
         </div>
       )}
 

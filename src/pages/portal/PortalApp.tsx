@@ -6,7 +6,7 @@ import { PROJECT_STATUS_LABEL, type ProjectStatus } from '@shared/constants'
 import { ApiError, portalApi, setPortalCsrf } from '@/lib/api'
 import { RealtimeProvider } from '@/lib/realtime'
 import { bytes, fmtDate, fmtDateTime, relative } from '@/lib/format'
-import { Badge, Button, Dialog, EmptyState, ErrorState, Field, Input, Panel, Section, Select, SkeletonRows, Tabs, Textarea, cx } from '@/components/ui'
+import { Badge, BrandLockup, BrandMark, Button, Dialog, EmptyState, ErrorState, Field, Input, Panel, Section, Select, SkeletonRows, Tabs, Textarea, cx } from '@/components/ui'
 import { useToast } from '@/components/toast'
 
 interface PortalMe {
@@ -36,10 +36,10 @@ function PortalShell({ me, children }: { me: PortalMe; children: React.ReactNode
     window.location.href = '/portal/access'
   }
   return (
-    <div className="min-h-dvh bg-ivory">
-      <header className="border-b border-line bg-paper">
+    <div className="starfield min-h-dvh bg-canvas">
+      <header className="border-b border-line bg-surface">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4 md:px-6">
-          <Link to="/portal" className="flex items-center gap-2.5"><span className="flex size-7 items-center justify-center rounded-[5px] bg-forest font-display text-[14px] text-paper">X</span><span className="font-display text-[16px] text-ink">Visionary X</span></Link>
+          <Link to="/portal"><BrandLockup size={28} /></Link>
           <span className="hidden text-[12.5px] text-muted sm:inline">· Client portal for {me.client.name}</span>
           <button onClick={logout} className="ml-auto inline-flex items-center gap-1.5 text-[12.5px] text-ink-2 hover:text-ink"><LogOut className="size-3.5" /> Sign out</button>
         </div>
@@ -47,7 +47,7 @@ function PortalShell({ me, children }: { me: PortalMe; children: React.ReactNode
       <main className="mx-auto max-w-5xl px-4 py-8 md:px-6">{children}</main>
       <footer className="mx-auto max-w-5xl px-4 pb-10 text-[12px] text-muted md:px-6">
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line pt-4">
-          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-forest" />Secure session · ends {fmtDateTime(me.expiresAt)}</span>
+          <span className="inline-flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-accent" />Secure session · ends {fmtDateTime(me.expiresAt)}</span>
           {me.support.email && <a href={`mailto:${me.support.email}`} className="hover:text-ink">{me.support.email}</a>}
           {me.support.phone && <span>{me.support.phone}</span>}
           <a href={me.support.website} target="_blank" rel="noreferrer noopener" className="hover:text-ink">{me.support.website.replace(/^https?:\/\//, '')}</a>
@@ -62,15 +62,15 @@ function Overview({ me }: { me: PortalMe }) {
   return (
     <div>
       <div className="eyebrow mb-1">{me.client.reference}</div>
-      <h1 className="font-display text-[30px] text-ink">Your projects</h1>
+      <h1 className="display text-[34px] text-ink">Your projects</h1>
       {me.projects.length === 0 ? <div className="mt-6"><EmptyState title="No active projects are shared with this link" /></div> : (
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           {me.projects.map((p) => (
             <Link key={p.id} to={`/portal/projects/${p.id}`}>
               <Panel className="h-full p-5 transition-colors hover:border-line-strong">
-                <div className="flex justify-between"><span className="font-mono text-[11px] text-gold-700">{p.reference}</span><Badge tone="forest">{clientStatus(p.status)}</Badge></div>
-                <p className="mt-2 font-display text-[19px] text-ink">{p.name}</p>
-                <div className="mt-4 flex items-center gap-3"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-sage"><div className="h-full rounded-full bg-forest" style={{ width: `${p.progress}%` }} /></div><span className="font-mono text-[12px]">{Math.round(p.progress)}%</span></div>
+                <div className="flex justify-between"><span className="font-mono text-[11px] text-highlight-ink">{p.reference}</span><Badge tone="accent">{clientStatus(p.status)}</Badge></div>
+                <p className="mt-2 font-display font-bold tracking-[-0.02em] text-[19px] text-ink">{p.name}</p>
+                <div className="mt-4 flex items-center gap-3"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-track"><div className="h-full rounded-full bg-accent" style={{ width: `${p.progress}%` }} /></div><span className="font-mono text-[12px]">{Math.round(p.progress)}%</span></div>
                 <p className="mt-3 text-[12.5px] text-muted">Target delivery {fmtDate(p.target_date)}</p>
               </Panel>
             </Link>
@@ -152,15 +152,15 @@ function ProjectView({ id, me }: { id: string; me: PortalMe }) {
   const awaiting = d.deliverables.filter((x) => x.status === 'shared')
   return (
     <div>
-      {me.projects.length > 1 && <Link to="/portal" className="mb-3 inline-block text-[12.5px] text-forest hover:underline">← All projects</Link>}
+      {me.projects.length > 1 && <Link to="/portal" className="mb-3 inline-block text-[12.5px] text-accent hover:underline">← All projects</Link>}
       <div className="eyebrow mb-1">{p.reference}</div>
-      <h1 className="font-display text-[32px] leading-tight text-ink" style={{ fontVariationSettings: '"opsz" 72' }}>{p.name}</h1>
+      <h1 className="display text-[36px] text-ink sm:text-[44px]">{p.name}</h1>
       <div className="mt-6 grid gap-4 md:grid-cols-[1.2fr_1fr]">
         <Panel className="p-5">
-          <div className="flex items-baseline justify-between"><span className="eyebrow">Progress</span><Badge tone={p.status === 'completed' ? 'ok' : 'forest'}>{clientStatus(p.status)}</Badge></div>
-          <div className="mt-2 font-display text-[48px] leading-none tabular">{Math.round(p.progress)}%</div>
-          <div className="mt-3 h-2 overflow-hidden rounded-full bg-sage"><div className="h-full rounded-full bg-forest" style={{ width: `${p.progress}%` }} /></div>
-          {p.client_status_note && <p className="mt-4 rounded bg-ivory px-3 py-2 text-[13.5px] text-ink-2">{p.client_status_note}</p>}
+          <div className="flex items-baseline justify-between"><span className="eyebrow">Progress</span><Badge tone={p.status === 'completed' ? 'ok' : 'accent'}>{clientStatus(p.status)}</Badge></div>
+          <div className="mt-2 font-display font-bold tracking-[-0.02em] text-[48px] leading-none tabular">{Math.round(p.progress)}%</div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-track"><div className="h-full rounded-full bg-accent" style={{ width: `${p.progress}%` }} /></div>
+          {p.client_status_note && <p className="mt-4 rounded bg-canvas px-3 py-2 text-[13.5px] text-ink-2">{p.client_status_note}</p>}
         </Panel>
         <Panel className="p-5 text-[13.5px]">
           <div className="eyebrow mb-3">Delivery</div>
@@ -172,14 +172,14 @@ function ProjectView({ id, me }: { id: string; me: PortalMe }) {
           <div className="mt-4 border-t border-line pt-3">
             <div className="eyebrow mb-1.5">Your project manager</div>
             <p className="text-ink">{p.manager_name ?? '—'}</p>
-            {p.manager_email && <a href={`mailto:${p.manager_email}`} className="mt-1 flex items-center gap-1.5 text-forest hover:underline"><Mail className="size-3.5" />{p.manager_email}</a>}
+            {p.manager_email && <a href={`mailto:${p.manager_email}`} className="mt-1 flex items-center gap-1.5 text-accent hover:underline"><Mail className="size-3.5" />{p.manager_email}</a>}
             {p.manager_phone && <a href={`tel:${p.manager_phone}`} className="mt-1 flex items-center gap-1.5 text-ink-2"><Phone className="size-3.5" />{p.manager_phone}</a>}
           </div>
         </Panel>
       </div>
 
       {awaiting.length > 0 && (
-        <button onClick={() => setTab('deliverables')} className="mt-4 flex w-full items-center gap-3 rounded-lg border border-gold/40 bg-gold-100/60 px-4 py-3 text-left text-[13.5px] text-gold-700">
+        <button onClick={() => setTab('deliverables')} className="mt-4 flex w-full items-center gap-3 rounded-lg border border-highlight/40 bg-highlight-soft/60 px-4 py-3 text-left text-[13.5px] text-highlight-ink">
           <FileText className="size-4" /><span><span className="font-medium">{awaiting.length} deliverable(s)</span> waiting for your review</span>
         </button>
       )}
@@ -195,7 +195,7 @@ function ProjectView({ id, me }: { id: string; me: PortalMe }) {
                 <ol className="relative ml-1.5 space-y-4 border-l border-line pl-5">
                   {d.milestones.map((m) => (
                     <li key={m.id} className="relative">
-                      <span className={cx('absolute -left-[26px] top-1 size-[11px] rotate-45 border-2 border-ivory', m.status === 'achieved' ? 'bg-ok' : m.status === 'in_progress' ? 'bg-forest' : 'bg-gold')} />
+                      <span className={cx('absolute -left-[26px] top-1 size-[11px] rotate-45 border-2 border-canvas', m.status === 'achieved' ? 'bg-ok' : m.status === 'in_progress' ? 'bg-accent' : 'bg-highlight')} />
                       <p className="font-medium text-ink">{m.title}</p>
                       <p className="text-[12.5px] text-muted">{m.status === 'achieved' ? <span className="text-ok">Achieved {fmtDate(m.achieved_at)}</span> : `Planned ${fmtDate(m.due_date)}`}</p>
                       {m.description && <p className="mt-0.5 text-[13px] text-ink-2">{m.description}</p>}
@@ -218,14 +218,14 @@ function ProjectView({ id, me }: { id: string; me: PortalMe }) {
                 <Panel className="p-5">
                   <div className="flex flex-wrap items-start gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="font-display text-[18px] text-ink">{x.title}</p>
+                      <p className="font-display font-bold tracking-[-0.02em] text-[18px] text-ink">{x.title}</p>
                       {x.description && <p className="text-[13px] text-ink-2">{x.description}</p>}
                       <p className="mt-1 text-[12px] text-muted">Shared {fmtDate(x.shared_at)}{x.client_decision_at && ` · decided ${fmtDate(x.client_decision_at)}`}</p>
                     </div>
-                    {x.status === 'shared' ? <Badge tone="gold">Awaiting your review</Badge> : x.status === 'client_approved' ? <Badge tone="ok"><CheckCircle2 className="size-3" /> Approved</Badge> : <Badge tone="warn">Changes requested</Badge>}
+                    {x.status === 'shared' ? <Badge tone="highlight">Awaiting your review</Badge> : x.status === 'client_approved' ? <Badge tone="ok"><CheckCircle2 className="size-3" /> Approved</Badge> : <Badge tone="warn">Changes requested</Badge>}
                   </div>
                   <ul className="mt-3 divide-y divide-line/70 rounded-md border border-line">{x.files.map((f) => (
-                    <li key={f.id} className="flex items-center gap-3 px-3 py-2 text-[13px]"><span className="font-mono text-[11px] text-gold-700">v{f.version}</span><span className="min-w-0 flex-1 truncate">{f.file_name}</span><span className="text-[12px] text-muted">{bytes(f.size_bytes)}</span><a href={`/api/portal/files/${f.id}`} className="inline-flex items-center gap-1 text-forest hover:underline"><Download className="size-3.5" />Download</a></li>
+                    <li key={f.id} className="flex items-center gap-3 px-3 py-2 text-[13px]"><span className="font-mono text-[11px] text-highlight-ink">v{f.version}</span><span className="min-w-0 flex-1 truncate">{f.file_name}</span><span className="text-[12px] text-muted">{bytes(f.size_bytes)}</span><a href={`/api/portal/files/${f.id}`} className="inline-flex items-center gap-1 text-accent hover:underline"><Download className="size-3.5" />Download</a></li>
                   ))}</ul>
                   {x.status === 'shared' && <div className="mt-4 flex flex-wrap justify-end gap-2"><Button onClick={() => setDecision({ id: x.id, title: x.title, decision: 'changes_requested' })}>Request changes</Button><Button variant="primary" onClick={() => setDecision({ id: x.id, title: x.title, decision: 'client_approved' })}>Approve</Button></div>}
                 </Panel>
@@ -239,9 +239,9 @@ function ProjectView({ id, me }: { id: string; me: PortalMe }) {
               {d.feedback.length === 0 ? <p className="text-[13px] text-muted">No messages yet.</p> : (
                 <ul className="space-y-3">{d.feedback.map((f) => (
                   <li key={f.id}><Panel className="p-4">
-                    <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted"><Badge tone="outline">{f.kind.replace('_', ' ')}</Badge>{f.author_name} · {relative(f.created_at)}<Badge tone={f.status === 'resolved' ? 'ok' : f.status === 'acknowledged' ? 'gold' : 'neutral'} className="ml-auto">{f.status === 'open' ? 'Received' : f.status}</Badge></div>
+                    <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted"><Badge tone="outline">{f.kind.replace('_', ' ')}</Badge>{f.author_name} · {relative(f.created_at)}<Badge tone={f.status === 'resolved' ? 'ok' : f.status === 'acknowledged' ? 'highlight' : 'neutral'} className="ml-auto">{f.status === 'open' ? 'Received' : f.status}</Badge></div>
                     <p className="mt-2 whitespace-pre-wrap text-[13.5px] text-ink">{f.body}</p>
-                    {f.response && <div className="mt-3 rounded-md bg-forest-50 px-3 py-2 text-[13px] text-forest-700"><span className="font-medium">Visionary X</span> · {relative(f.responded_at)}<p className="mt-0.5 whitespace-pre-wrap">{f.response}</p></div>}
+                    {f.response && <div className="mt-3 rounded-md bg-accent-faint px-3 py-2 text-[13px] text-accent-strong"><span className="font-medium">Visionary X</span> · {relative(f.responded_at)}<p className="mt-0.5 whitespace-pre-wrap">{f.response}</p></div>}
                   </Panel></li>
                 ))}</ul>
               )}
@@ -260,7 +260,7 @@ function ProjectView({ id, me }: { id: string; me: PortalMe }) {
         {tab === 'timeline' && (
           d.timeline.length === 0 ? <p className="text-[13px] text-muted">No history yet.</p> : (
             <ol className="relative ml-2 space-y-4 border-l border-line pl-6">{d.timeline.map((t, i) => (
-              <li key={i} className="relative"><span className={cx('absolute -left-[29px] top-1.5 size-2.5 rounded-full ring-4 ring-ivory', t.type === 'milestone' ? 'bg-ok' : t.type === 'deliverable' ? 'bg-gold' : t.type === 'feedback' ? 'bg-info' : 'bg-forest')} /><p className="text-[13.5px] text-ink">{t.title}</p><p className="text-[12px] text-muted">{fmtDateTime(t.at)}</p></li>
+              <li key={i} className="relative"><span className={cx('absolute -left-[29px] top-1.5 size-2.5 rounded-full ring-4 ring-canvas', t.type === 'milestone' ? 'bg-ok' : t.type === 'deliverable' ? 'bg-highlight' : t.type === 'feedback' ? 'bg-info' : 'bg-accent')} /><p className="text-[13.5px] text-ink">{t.title}</p><p className="text-[12px] text-muted">{fmtDateTime(t.at)}</p></li>
             ))}</ol>
           )
         )}
@@ -296,14 +296,14 @@ export default function PortalApp() {
   useEffect(() => {
     document.title = q.data ? `${q.data.client.name} · Visionary X` : 'Visionary X · Client portal'
   }, [q.data])
-  if (q.isLoading) return <div className="flex min-h-dvh items-center justify-center bg-ivory"><SkeletonRows rows={3} /></div>
+  if (q.isLoading) return <div className="flex min-h-dvh items-center justify-center bg-canvas"><SkeletonRows rows={3} /></div>
   if (q.error || !q.data) {
     const expired = q.error instanceof ApiError && q.error.status === 401
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-ivory px-5">
+      <div className="flex min-h-dvh items-center justify-center bg-canvas px-5">
         <div className="max-w-md text-center">
-          <span className="mx-auto mb-6 flex size-10 items-center justify-center rounded-[6px] bg-forest font-display text-lg text-paper">X</span>
-          <h1 className="font-display text-[26px] text-ink">{expired ? 'Your portal session has ended' : 'Something went wrong'}</h1>
+          <BrandMark size={44} className="mx-auto mb-6" />
+          <h1 className="display text-[28px] text-ink">{expired ? 'Your portal session has ended' : 'Something went wrong'}</h1>
           <p className="mt-3 text-[14px] text-ink-2">{expired ? 'For your security, portal sessions are short-lived. Open the secure link from your Visionary X project manager again to continue.' : 'Please try again in a moment.'}</p>
         </div>
       </div>

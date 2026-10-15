@@ -36,7 +36,7 @@ function Directory() {
                   <Panel className="flex h-full gap-3 p-4 transition-colors hover:border-line-strong">
                     <Avatar name={m.name} color={m.avatar_color} size={40} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2"><span className="truncate font-medium text-ink">{m.name}</span>{m.is_seed && <SampleTag />}{m.status === 'invited' && <Badge tone="gold">Invited</Badge>}</div>
+                      <div className="flex items-center gap-2"><span className="truncate font-medium text-ink">{m.name}</span>{m.is_seed && <SampleTag />}{m.status === 'invited' && <Badge tone="highlight">Invited</Badge>}</div>
                       <p className="truncate text-[12.5px] text-ink-2">{m.designation || '—'}</p>
                       <p className="truncate text-[12px] text-muted">{m.department_name ?? 'No department'}{m.manager_name && ` · reports to ${m.manager_name}`}</p>
                       {m.skills.length > 0 && <div className="mt-2 flex flex-wrap gap-1">{m.skills.slice(0, 4).map((s) => <Badge key={s} tone="outline">{s}</Badge>)}</div>}
@@ -64,12 +64,12 @@ function Workload() {
               <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={d.departments} margin={{ left: 0, right: 12 }}>
-                    <CartesianGrid vertical={false} stroke="#e1dccf" />
-                    <XAxis dataKey="name" tick={{ fontSize: 11.5, fill: '#464b4f' }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fontSize: 11, fill: '#767a74' }} axisLine={false} tickLine={false} width={36} />
-                    <Tooltip contentStyle={{ fontSize: 12, borderRadius: 6, border: '1px solid #e1dccf' }} />
-                    <Bar dataKey="open_estimate_hours" name="Open estimated hours" fill="#1f4d3a" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="capacity" name="Weekly capacity (h)" fill="#b39556" radius={[3, 3, 0, 0]} />
+                    <CartesianGrid vertical={false} stroke="#262626" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11.5, fill: '#cccaca' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: '#8d8b88' }} axisLine={false} tickLine={false} width={36} />
+                    <Tooltip contentStyle={{ background: '#141414', color: '#fbfaf7', fontSize: 12, borderRadius: 6, border: '1px solid #262626' }} />
+                    <Bar dataKey="open_estimate_hours" name="Open estimated hours" fill="#fbfaf7" radius={[3, 3, 0, 0]} />
+                    <Bar dataKey="capacity" name="Weekly capacity (h)" fill="#8d8b88" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -92,7 +92,7 @@ function Workload() {
                     <Td align="right" className={cx('font-mono', m.blocked > 0 && 'text-danger')}>{m.blocked}</Td>
                     <Td align="right" className="font-mono">{Math.round(m.open_estimate_hours)}</Td>
                     <Td className="min-w-[140px]">{ratio === null ? <span className="text-[12px] text-faint">No capacity recorded</span> : (
-                      <div className="flex items-center gap-2"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-sage"><div className={cx('h-full rounded-full', ratio > 1.5 ? 'bg-danger' : ratio > 1 ? 'bg-warn' : 'bg-forest')} style={{ width: `${Math.min(100, ratio * 66)}%` }} /></div><span className="w-12 text-right font-mono text-[11px] text-muted">{ratio.toFixed(1)}w</span></div>
+                      <div className="flex items-center gap-2"><div className="h-1.5 flex-1 overflow-hidden rounded-full bg-track"><div className={cx('h-full rounded-full', ratio > 1.5 ? 'bg-danger' : ratio > 1 ? 'bg-warn' : 'bg-accent')} style={{ width: `${Math.min(100, ratio * 66)}%` }} /></div><span className="w-12 text-right font-mono text-[11px] text-muted">{ratio.toFixed(1)}w</span></div>
                     )}</Td>
                     <Td align="right" className="font-mono">{Math.round(m.minutes_30d / 60)} h</Td>
                   </Tr>

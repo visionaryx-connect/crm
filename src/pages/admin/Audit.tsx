@@ -35,9 +35,9 @@ export default function Audit() {
             <tbody>{rows.map((e) => (
               <Tr key={e.id} onClick={() => setExpanded(expanded === e.id ? null : e.id)}>
                 <Td className="whitespace-nowrap font-mono text-[11.5px] text-muted">{fmtDateTime(e.created_at)}</Td>
-                <Td className="text-ink">{e.actor_type === 'user' ? e.actor_name ?? 'Unknown user' : <Badge tone={e.actor_type === 'client' ? 'gold' : 'outline'}>{e.actor_type}</Badge>}</Td>
+                <Td className="text-ink">{e.actor_type === 'user' ? e.actor_name ?? 'Unknown user' : <Badge tone={e.actor_type === 'client' ? 'highlight' : 'outline'}>{e.actor_type}</Badge>}</Td>
                 <Td><span className="font-mono text-[11.5px] text-ink-2">{e.action}</span></Td>
-                <Td className="text-ink-2">{e.summary}{expanded === e.id && e.changes != null && <pre className="mt-2 max-h-60 overflow-auto rounded bg-ivory p-2 font-mono text-[11px] text-ink-2">{JSON.stringify(e.changes, null, 2)}</pre>}</Td>
+                <Td className="text-ink-2">{e.summary}{expanded === e.id && e.changes != null && <pre className="mt-2 max-h-60 overflow-auto rounded bg-canvas p-2 font-mono text-[11px] text-ink-2">{JSON.stringify(e.changes, null, 2)}</pre>}</Td>
                 <Td className="font-mono text-[11px] text-muted">{e.ip ?? '—'}</Td>
               </Tr>
             ))}</tbody>

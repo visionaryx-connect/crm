@@ -50,7 +50,7 @@ export default function Dashboard() {
       <header className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-line pb-5">
         <div>
           <div className="eyebrow mb-1.5">{fmtWeekday(todayIST())}</div>
-          <h1 className="font-display text-[30px] leading-tight text-ink" style={{ fontVariationSettings: '"opsz" 72' }}>
+          <h1 className="display text-[34px] text-ink">
             {greeting()}, {me.user.name.split(' ')[0]}
           </h1>
           <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted">
@@ -76,7 +76,7 @@ export default function Dashboard() {
       {q.error && <ErrorState error={q.error} retry={() => q.refetch()} />}
 
       {d?.unverifiedHolidays ? (
-        <Link to="/settings?tab=holidays" className="mb-6 flex items-center gap-3 rounded-lg border border-gold/40 bg-gold-100/60 px-4 py-2.5 text-[13px] text-gold-700 hover:bg-gold-100">
+        <Link to="/settings?tab=holidays" className="mb-6 flex items-center gap-3 rounded-lg border border-highlight/40 bg-highlight-soft/60 px-4 py-2.5 text-[13px] text-highlight-ink hover:bg-highlight-soft">
           <ShieldAlert className="size-4" />
           <span>
             <span className="font-medium">{d.unverifiedHolidays} holiday record(s)</span> await verification against the official government notification. Unverified holidays are not applied to attendance or leave.
@@ -102,7 +102,7 @@ export default function Dashboard() {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
-          <Section title="Delivery" description="Active projects you can see, ordered by target date. Health is assessed separately from progress." actions={<Link to="/projects" className="text-[12.5px] text-forest hover:underline">All projects</Link>}>
+          <Section title="Delivery" description="Active projects you can see, ordered by target date. Health is assessed separately from progress." actions={<Link to="/projects" className="text-[12.5px] text-accent hover:underline">All projects</Link>}>
             {!d ? (
               <Panel className="p-4"><SkeletonRows rows={5} /></Panel>
             ) : d.projects.length === 0 ? (
@@ -110,16 +110,16 @@ export default function Dashboard() {
             ) : (
               <Panel className="divide-y divide-line/70">
                 {d.projects.slice(0, 10).map((p) => (
-                  <Link key={p.id} to={`/projects/${p.id}`} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5 px-4 py-3 transition-colors hover:bg-ivory/70 md:grid-cols-[minmax(0,1fr)_160px_96px_84px]">
+                  <Link key={p.id} to={`/projects/${p.id}`} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5 px-4 py-3 transition-colors hover:bg-canvas/70 xl:grid-cols-[minmax(0,1fr)_150px_92px_70px]">
                     <div className="min-w-0">
                       <div className="flex items-baseline gap-2">
-                        <span className="font-mono text-[11px] text-gold-700">{p.reference}</span>
+                        <span className="shrink-0 whitespace-nowrap font-mono text-[11px] text-highlight-ink">{p.reference}</span>
                         <span className="truncate font-medium text-ink">{p.name}</span>
                       </div>
                       <div className="truncate text-[12px] text-muted">{p.client_name} · {p.manager_name ?? 'No manager'}</div>
                     </div>
-                    <div className="hidden md:block"><ProgressFigure value={p.progress} hasData={p.total_tasks > 0} compact /></div>
-                    <div className="hidden md:block"><HealthDot health={p.health} reasons={p.health_reasons} /></div>
+                    <div className="hidden xl:block"><ProgressFigure value={p.progress} hasData={p.total_tasks > 0} compact /></div>
+                    <div className="hidden xl:block"><HealthDot health={p.health} reasons={p.health_reasons} /></div>
                     <div className="text-right text-[12.5px]"><DueText date={p.target_date} /></div>
                   </Link>
                 ))}
@@ -135,13 +135,13 @@ export default function Dashboard() {
                     <AreaChart data={fillDays(d.company.throughput)} margin={{ left: 8, right: 8, top: 4, bottom: 0 }}>
                       <defs>
                         <linearGradient id="tp" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1f4d3a" stopOpacity={0.22} />
-                          <stop offset="100%" stopColor="#1f4d3a" stopOpacity={0} />
+                          <stop offset="0%" stopColor="#fbfaf7" stopOpacity={0.22} />
+                          <stop offset="100%" stopColor="#fbfaf7" stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="day" tickFormatter={(v) => fmtDateShort(v)} tick={{ fontSize: 10.5, fill: '#767a74' }} axisLine={false} tickLine={false} interval={6} />
-                      <Tooltip formatter={(v) => [v, 'Completed']} labelFormatter={(l) => fmtDateShort(String(l))} contentStyle={{ fontSize: 12, borderRadius: 6, border: '1px solid #e1dccf' }} />
-                      <Area type="monotone" dataKey="completed" stroke="#1f4d3a" strokeWidth={1.6} fill="url(#tp)" />
+                      <XAxis dataKey="day" tickFormatter={(v) => fmtDateShort(v)} tick={{ fontSize: 10.5, fill: '#8d8b88' }} axisLine={false} tickLine={false} interval={6} />
+                      <Tooltip formatter={(v) => [v, 'Completed']} labelFormatter={(l) => fmtDateShort(String(l))} contentStyle={{ background: '#141414', color: '#fbfaf7', fontSize: 12, borderRadius: 6, border: '1px solid #262626' }} />
+                      <Area type="monotone" dataKey="completed" stroke="#fbfaf7" strokeWidth={1.6} fill="url(#tp)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -151,7 +151,7 @@ export default function Dashboard() {
         </div>
 
         <aside className="min-w-0 space-y-8">
-          <Section title="Your next tasks" actions={<Link to="/tasks" className="text-[12.5px] text-forest hover:underline">My work</Link>}>
+          <Section title="Your next tasks" actions={<Link to="/tasks" className="text-[12.5px] text-accent hover:underline">My work</Link>}>
             {!d ? (
               <SkeletonRows rows={4} />
             ) : d.myTasks.length === 0 ? (
@@ -160,7 +160,7 @@ export default function Dashboard() {
               <ul className="space-y-1">
                 {d.myTasks.map((t) => (
                   <li key={t.id}>
-                    <Link to={`/tasks/${t.id}`} className="block rounded-md px-2.5 py-2 hover:bg-paper">
+                    <Link to={`/tasks/${t.id}`} className="block rounded-md px-2.5 py-2 hover:bg-surface">
                       <div className="flex items-start gap-2">
                         <PriorityMark priority={t.priority} />
                         <span className="flex-1 text-[13px] leading-snug text-ink">{t.title}</span>
@@ -178,11 +178,11 @@ export default function Dashboard() {
           </Section>
 
           {d && d.reviewQueue.length > 0 && (
-            <Section title="Awaiting your review" actions={<Link to="/tasks?view=review" className="text-[12.5px] text-forest hover:underline">Review queue</Link>}>
+            <Section title="Awaiting your review" actions={<Link to="/tasks?view=review" className="text-[12.5px] text-accent hover:underline">Review queue</Link>}>
               <ul className="space-y-1">
                 {d.reviewQueue.map((t) => (
                   <li key={t.id}>
-                    <Link to={`/tasks/${t.id}`} className="block rounded-md border-l-2 border-info/60 bg-paper px-3 py-2 hover:bg-white">
+                    <Link to={`/tasks/${t.id}`} className="block rounded-md border-l-2 border-info/60 bg-surface px-3 py-2 hover:bg-white">
                       <div className="text-[13px] text-ink">{t.title}</div>
                       <div className="mt-0.5 text-[11.5px] text-muted">
                         <span className="font-mono">{t.project_reference}-{t.number}</span> · {t.responsible_name ?? 'Unassigned'} · submitted {relative(t.submitted_at)}
@@ -203,7 +203,7 @@ export default function Dashboard() {
               <ol className="relative ml-1.5 space-y-3 border-l border-line pl-4">
                 {d.milestones.map((m) => (
                   <li key={m.id} className="relative">
-                    <span className={cx('absolute -left-[21px] top-1.5 size-2 rounded-full ring-4 ring-ivory', m.due_date < d.today ? 'bg-danger' : 'bg-gold')} aria-hidden />
+                    <span className={cx('absolute -left-[21px] top-1.5 size-2 rounded-full ring-4 ring-canvas', m.due_date < d.today ? 'bg-danger' : 'bg-highlight')} aria-hidden />
                     <Link to={`/projects/${m.project_id}?tab=milestones`} className="block hover:underline">
                       <span className="text-[13px] text-ink">{m.title}</span>
                     </Link>

@@ -59,14 +59,14 @@ function rangeFor(view: View, anchor: string) {
 }
 
 const typeStyle: Record<Item['type'], string> = {
-  event: 'bg-forest-100 text-forest-700 border-forest/20',
+  event: 'bg-accent-soft text-accent-strong border-accent/20',
   project_deadline: 'bg-danger-bg text-danger border-danger/20',
-  milestone: 'bg-gold-100 text-gold-700 border-gold/30',
-  task_due: 'bg-paper text-ink-2 border-line-strong',
+  milestone: 'bg-highlight-soft text-highlight-ink border-highlight/30',
+  task_due: 'bg-surface text-ink-2 border-line-strong',
   leave: 'bg-info-bg text-info border-info/20',
-  holiday: 'bg-sage text-forest-700 border-sage-deep',
+  holiday: 'bg-track text-accent-strong border-track-strong',
 }
-const kindStyle: Record<string, string> = { client_meeting: 'bg-gold-100 text-gold-700 border-gold/30', company_event: 'bg-forest text-paper border-forest' }
+const kindStyle: Record<string, string> = { client_meeting: 'bg-highlight-soft text-highlight-ink border-highlight/30', company_event: 'bg-accent text-surface border-accent' }
 
 function itemDates(it: Item): [string, string] {
   if (it.type === 'event') return [istDate(it.start!), istDate(new Date(Date.parse(it.end!) - 1).toISOString())]
@@ -206,18 +206,18 @@ function ItemDialog({ item, onClose, onEdit }: { item: Item | null; onClose: () 
       </>
     ) : undefined}>
       {item.type === 'holiday' ? (
-        <div className="space-y-2 text-[13.5px]"><p>{item.date} · {item.kind} holiday</p>{!item.verified && <Badge tone="gold">Pending verification — not yet applied to attendance or leave</Badge>}{item.dayOff === false && <p className="text-muted">Optional / not a day off.</p>}{can('holidays.manage') && <Link to="/settings?tab=holidays" className="link">Manage holidays</Link>}</div>
+        <div className="space-y-2 text-[13.5px]"><p>{item.date} · {item.kind} holiday</p>{!item.verified && <Badge tone="highlight">Pending verification — not yet applied to attendance or leave</Badge>}{item.dayOff === false && <p className="text-muted">Optional / not a day off.</p>}{can('holidays.manage') && <Link to="/settings?tab=holidays" className="link">Manage holidays</Link>}</div>
       ) : item.type === 'leave' ? (
         <p className="text-[13.5px]">{item.start} → {item.end}</p>
       ) : !e ? <Spinner /> : (
         <div className="space-y-3 text-[13.5px]">
-          <div className="flex flex-wrap gap-2"><Badge tone="forest">{EVENT_KIND_LABEL[e.kind as keyof typeof EVENT_KIND_LABEL]}</Badge>{e.recurrence_rule && <Badge tone="outline"><Repeat className="size-3" /> {e.recurrence_rule}</Badge>}</div>
+          <div className="flex flex-wrap gap-2"><Badge tone="accent">{EVENT_KIND_LABEL[e.kind as keyof typeof EVENT_KIND_LABEL]}</Badge>{e.recurrence_rule && <Badge tone="outline"><Repeat className="size-3" /> {e.recurrence_rule}</Badge>}</div>
           <p className="text-ink">{e.all_day ? 'All day' : `${fmtDateTime(item.start)} – ${fmtTime(item.end)}`}</p>
           {e.location && <p className="flex items-center gap-1.5 text-ink-2"><MapPin className="size-3.5" />{e.location}</p>}
           {e.project_name && <p className="text-ink-2">Project: <Link to={`/projects/${e.project_id}`} className="link">{e.project_name}</Link></p>}
           {e.client_name && <p className="text-ink-2">Client: {e.client_name}</p>}
           <p className="text-ink-2">Organiser: {e.organizer_name ?? '—'}</p>
-          {e.description && <p className="whitespace-pre-wrap rounded bg-ivory px-3 py-2 text-ink-2">{e.description}</p>}
+          {e.description && <p className="whitespace-pre-wrap rounded bg-canvas px-3 py-2 text-ink-2">{e.description}</p>}
           {ev.data!.attendees.length > 0 && <div><div className="eyebrow mb-1">Attendees</div><ul className="grid grid-cols-2 gap-1 text-[12.5px]">{ev.data!.attendees.map((a) => <li key={a.user_id} className="flex items-center gap-1.5"><span className={cx('size-1.5 rounded-full', a.response === 'accepted' ? 'bg-ok' : a.response === 'declined' ? 'bg-danger' : 'bg-line-strong')} />{a.name}</li>)}</ul></div>}
         </div>
       )}
@@ -278,19 +278,19 @@ export default function CalendarPage() {
       } />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <div className="flex items-center rounded-md border border-line bg-paper">
-          <button className="px-2 py-1.5 hover:bg-porcelain" onClick={() => step(-1)} aria-label="Previous"><ChevronLeft className="size-4" /></button>
-          <button className="border-x border-line px-3 py-1.5 text-[12.5px] font-medium hover:bg-porcelain" onClick={() => setAnchor(today)}>Today</button>
-          <button className="px-2 py-1.5 hover:bg-porcelain" onClick={() => step(1)} aria-label="Next"><ChevronRight className="size-4" /></button>
+        <div className="flex items-center rounded-md border border-line bg-surface">
+          <button className="px-2 py-1.5 hover:bg-subtle" onClick={() => step(-1)} aria-label="Previous"><ChevronLeft className="size-4" /></button>
+          <button className="border-x border-line px-3 py-1.5 text-[12.5px] font-medium hover:bg-subtle" onClick={() => setAnchor(today)}>Today</button>
+          <button className="px-2 py-1.5 hover:bg-subtle" onClick={() => step(1)} aria-label="Next"><ChevronRight className="size-4" /></button>
         </div>
-        <h2 className="min-w-[180px] font-display text-[19px] text-ink">{title}</h2>
+        <h2 className="min-w-[180px] font-display font-bold tracking-[-0.02em] text-[19px] text-ink">{title}</h2>
         {q.isFetching && <Spinner />}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <Select className="w-40 !h-8" value={projectId} onChange={(e) => setProjectId(e.target.value)} aria-label="Project filter"><option value="">All projects</option>{projects.data?.map((p) => <option key={p.id} value={p.id}>{p.reference} · {p.name}</option>)}</Select>
           <Select className="w-36 !h-8" value={departmentId} onChange={(e) => setDepartmentId(e.target.value)} aria-label="Department filter"><option value="">All departments</option>{departments.data?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</Select>
           <Select className="w-32 !h-8" value={scope} onChange={(e) => setScope(e.target.value as 'mine' | 'all')} aria-label="Task scope"><option value="mine">My tasks</option><option value="all">All tasks</option></Select>
-          <div className="flex rounded-md border border-line bg-paper p-0.5" role="group" aria-label="Calendar view">
-            {(['month', 'week', 'day', 'agenda'] as View[]).map((vw) => <button key={vw} onClick={() => setView(vw)} aria-pressed={view === vw} className={cx('rounded px-2.5 py-1 text-[12.5px] capitalize', view === vw ? 'bg-forest text-paper' : 'text-ink-2 hover:bg-porcelain')}>{vw}</button>)}
+          <div className="flex rounded-md border border-line bg-surface p-0.5" role="group" aria-label="Calendar view">
+            {(['month', 'week', 'day', 'agenda'] as View[]).map((vw) => <button key={vw} onClick={() => setView(vw)} aria-pressed={view === vw} className={cx('rounded px-2.5 py-1 text-[12.5px] capitalize', view === vw ? 'bg-accent text-surface' : 'text-ink-2 hover:bg-subtle')}>{vw}</button>)}
           </div>
         </div>
       </div>
@@ -305,19 +305,19 @@ export default function CalendarPage() {
       {q.error && <ErrorState error={q.error} retry={() => q.refetch()} />}
 
       {view === 'month' && (
-        <div className="overflow-hidden rounded-lg border border-line bg-paper">
-          <div className="grid grid-cols-7 border-b border-line bg-ivory/70">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <div key={d} className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">{d}</div>)}</div>
+        <div className="overflow-hidden rounded-lg border border-line bg-surface">
+          <div className="grid grid-cols-7 border-b border-line bg-canvas/70">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <div key={d} className="px-2 py-1.5 text-[11px] font-semibold uppercase tracking-[0.07em] text-muted">{d}</div>)}</div>
           <div className="grid grid-cols-7">
             {Array.from({ length: 42 }, (_, i) => addDays(from, i)).map((d) => {
               const info = dayInfo.get(d)
               const list = byDay.get(d) ?? []
               const inMonth = d.slice(0, 7) === anchor.slice(0, 7)
               return (
-                <div key={d} className={cx('group min-h-[112px] border-b border-r border-line/70 p-1.5 [&:nth-child(7n)]:border-r-0', !inMonth && 'bg-ivory/50', info && !info.working && 'bg-porcelain/50')} onDoubleClick={() => setEditing({ date: d })}>
+                <div key={d} className={cx('group min-h-[112px] border-b border-r border-line/70 p-1.5 [&:nth-child(7n)]:border-r-0', !inMonth && 'bg-canvas/50', info && !info.working && 'bg-subtle/50')} onDoubleClick={() => setEditing({ date: d })}>
                   <div className="mb-1 flex items-center justify-between">
-                    <button onClick={() => { setAnchor(d); setView('day') }} className={cx('flex size-6 items-center justify-center rounded-full font-mono text-[11.5px]', d === today ? 'bg-forest text-paper' : inMonth ? 'text-ink hover:bg-porcelain' : 'text-faint')}>{Number(d.slice(8))}</button>
+                    <button onClick={() => { setAnchor(d); setView('day') }} className={cx('flex size-6 items-center justify-center rounded-full font-mono text-[11.5px]', d === today ? 'bg-accent text-surface' : inMonth ? 'text-ink hover:bg-subtle' : 'text-faint')}>{Number(d.slice(8))}</button>
                     {info && !info.working && info.kind !== 'holiday' && <span className="text-[10px] uppercase tracking-wider text-faint">{info.kind === 'weekend' ? 'Off' : 'Off'}</span>}
-                    {info?.kind === 'override_working' && <span className="text-[10px] text-gold-700" title={info.label}>Working</span>}
+                    {info?.kind === 'override_working' && <span className="text-[10px] text-highlight-ink" title={info.label}>Working</span>}
                   </div>
                   <div className="space-y-0.5">
                     {list.slice(0, 4).map((it) => <Chip key={it.id + d} it={it} onOpen={setOpen} />)}
@@ -336,14 +336,14 @@ export default function CalendarPage() {
         const endH = 21
         const hourPx = 48
         return (
-          <div className="overflow-x-auto rounded-lg border border-line bg-paper">
+          <div className="overflow-x-auto rounded-lg border border-line bg-surface">
             <div className={cx('grid', view === 'week' ? 'min-w-[840px] grid-cols-[56px_repeat(7,1fr)]' : 'grid-cols-[56px_1fr]')}>
-              <div className="border-b border-line bg-ivory/70" />
+              <div className="border-b border-line bg-canvas/70" />
               {days.map((d) => {
                 const info = dayInfo.get(d)
                 return (
-                  <div key={d} className={cx('border-b border-l border-line px-2 py-1.5', info && !info.working && 'bg-porcelain/60')}>
-                    <div className={cx('text-[11px] uppercase tracking-[0.07em]', d === today ? 'text-forest font-semibold' : 'text-muted')}>{dayLabel(d, { weekday: 'short', day: 'numeric' })}</div>
+                  <div key={d} className={cx('border-b border-l border-line px-2 py-1.5', info && !info.working && 'bg-subtle/60')}>
+                    <div className={cx('text-[11px] uppercase tracking-[0.07em]', d === today ? 'text-accent font-semibold' : 'text-muted')}>{dayLabel(d, { weekday: 'short', day: 'numeric' })}</div>
                     <div className="mt-1 space-y-0.5">{allDay(byDay.get(d) ?? []).map((it) => <Chip key={it.id} it={it} onOpen={setOpen} />)}</div>
                   </div>
                 )
@@ -354,7 +354,7 @@ export default function CalendarPage() {
               {days.map((d) => (
                 <div key={d} className="relative border-l border-line" style={{ height: (endH - startH) * hourPx }} onDoubleClick={() => setEditing({ date: d })}>
                   {Array.from({ length: endH - startH }, (_, h) => <div key={h} className="absolute inset-x-0 border-t border-line/60" style={{ top: h * hourPx }} />)}
-                  {d === today && (() => { const m = istMinutes(new Date().toISOString()); return m >= startH * 60 && m <= endH * 60 ? <div className="absolute inset-x-0 z-10 h-px bg-gold" style={{ top: ((m - startH * 60) / 60) * hourPx }} /> : null })()}
+                  {d === today && (() => { const m = istMinutes(new Date().toISOString()); return m >= startH * 60 && m <= endH * 60 ? <div className="absolute inset-x-0 z-10 h-px bg-highlight" style={{ top: ((m - startH * 60) / 60) * hourPx }} /> : null })()}
                   {timed(byDay.get(d) ?? []).map((it) => {
                     const s = istDate(it.start!) < d ? startH * 60 : istMinutes(it.start!)
                     const e = istDate(it.end!) > d ? endH * 60 : istMinutes(it.end!)
@@ -379,10 +379,10 @@ export default function CalendarPage() {
           {Array.from({ length: 30 }, (_, i) => addDays(from, i)).filter((d) => (byDay.get(d) ?? []).length > 0).map((d) => (
             <section key={d} className="grid gap-3 sm:grid-cols-[150px_1fr]">
               <div className="pt-1">
-                <div className={cx('font-display text-[17px]', d === today ? 'text-forest' : 'text-ink')}>{dayLabel(d, { weekday: 'short', day: 'numeric', month: 'short' })}</div>
+                <div className={cx('font-display font-bold tracking-[-0.02em] text-[17px]', d === today ? 'text-accent' : 'text-ink')}>{dayLabel(d, { weekday: 'short', day: 'numeric', month: 'short' })}</div>
                 {dayInfo.get(d) && !dayInfo.get(d)!.working && <div className="text-[11.5px] text-muted">{dayInfo.get(d)!.label ?? 'Non-working day'}</div>}
               </div>
-              <ul className="divide-y divide-line/70 rounded-lg border border-line bg-paper">
+              <ul className="divide-y divide-line/70 rounded-lg border border-line bg-surface">
                 {(byDay.get(d) ?? []).map((it) => (
                   <li key={it.id} className="flex items-center gap-3 px-3 py-2 text-[13px]">
                     <span className="w-24 shrink-0 font-mono text-[11.5px] text-muted">{it.type === 'event' && !it.allDay ? `${fmtTime(it.start)}–${fmtTime(it.end)}` : 'All day'}</span>

@@ -2,13 +2,14 @@ import { calculateProgress, type ProgressMilestone, type ProgressTask } from '@s
 import type { Env } from '../env'
 import { newId } from '../lib/crypto'
 import { many, nowIso, one } from '../lib/db'
+import { runProjectAutomations } from './automations'
 import { publish, rooms, type Waiter } from './realtime'
 
 /**
  * Recalculate a project's derived progress from its tasks. Writes a snapshot only when the value changes,
  * which gives reports an exact "progress at date X" history. Publishes project.progress_updated after the write.
  */
-export async function recalcProgress(env: Env, waiter: Waiter, projectId: string): Promise<number | null> {
+export async function recalcProgress(env: Env, waiter: Waiter, projectId: string, opts: { automate?: boolean } = {}): Promise<number | null> {
   const project = await one<{ progress_mode: 'equal' | 'effort' | 'milestone'; progress: number }>(env.DB, 'SELECT progress_mode, progress FROM projects WHERE id = ?', projectId)
   if (!project) return null
   const tasks = await many<ProgressTask>(env.DB, 'SELECT status, estimate_hours, weight, milestone_id FROM tasks WHERE project_id = ?', projectId)
@@ -30,6 +31,11 @@ export async function recalcProgress(env: Env, waiter: Waiter, projectId: string
       { type: 'project.progress_updated', room: rooms.project(projectId), data: { projectId, progress: r.progress } },
       { type: 'portal.project_updated', room: rooms.portalProject(projectId), data: { projectId } },
     ])
+  }
+  // Workflow automations react to the new state; if they changed milestones, progress is recomputed once more.
+  if (opts.automate !== false) {
+    const res = await runProjectAutomations(env, waiter, projectId)
+    if (res.milestonesChanged) return recalcProgress(env, waiter, projectId, { automate: false })
   }
   return r.progress
 }

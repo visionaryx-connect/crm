@@ -1,35 +1,36 @@
 import type { ReactNode } from 'react'
+import { BrandLockup, BrandMark } from '@/components/ui'
 
+/** Sign-in family layout, echoing the visionary-x.in hero: carbon, star field, bold uppercase type with an outlined line. */
 export function AuthLayout({ title, subtitle, children, footer }: { title: string; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="grid min-h-dvh bg-ivory lg:grid-cols-[minmax(380px,0.9fr)_1.1fr]">
-      <aside className="relative hidden overflow-hidden bg-forest-700 p-10 text-paper lg:flex lg:flex-col">
-        <div className="flex items-center gap-3">
-          <span className="flex size-9 items-center justify-center rounded-[6px] bg-gold font-display text-lg font-semibold text-forest-700">X</span>
-          <div className="leading-tight">
-            <div className="font-display text-lg">Visionary X</div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#9db3a5]">Operations</div>
+    <div className="grid min-h-dvh bg-canvas lg:grid-cols-[1.1fr_minmax(400px,0.9fr)]">
+      <aside className="starfield relative hidden overflow-hidden border-r border-line p-10 lg:flex lg:flex-col">
+        <BrandLockup size={34} sub="Operations" />
+        <div className="mt-auto">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-line-strong px-3 py-1 text-[10.5px] font-medium uppercase tracking-[0.2em] text-ink-2">
+            <span className="size-1.5 rounded-full bg-ink" /> Internal workspace
           </div>
-        </div>
-        <div className="mt-auto max-w-sm">
-          <div className="mb-5 h-px w-16 bg-gold" />
-          <p className="font-display text-[26px] leading-snug text-paper" style={{ fontVariationSettings: '"opsz" 72' }}>
-            Clients, delivery and people — in one ledger the whole company trusts.
+          <p className="display text-[64px] text-ink xl:text-[84px]">
+            Run the
+            <br />
+            <span className="outline-text">mission</span>
+            <br />
+            control.
           </p>
-          <p className="mt-4 text-[13px] text-[#a9bcb0]">Internal workspace. Access is limited to Visionary X staff and is monitored.</p>
+          <p className="mt-6 max-w-sm text-[14px] text-ink-2">Clients, projects, people and delivery — one place the whole crew works from. Access is limited to Visionary X staff and is monitored.</p>
         </div>
-        <svg className="pointer-events-none absolute -right-24 -top-24 size-[420px] opacity-[0.07]" viewBox="0 0 100 100" aria-hidden>
-          <path d="M10 10 L90 90 M90 10 L10 90" stroke="#b39556" strokeWidth="6" strokeLinecap="round" />
-        </svg>
+        <div className="pointer-events-none absolute right-10 top-20 opacity-90">
+          <BrandMark size={240} />
+        </div>
       </aside>
       <div className="flex items-center justify-center px-5 py-12">
         <div className="w-full max-w-[380px]">
-          <div className="mb-8 flex items-center gap-2.5 lg:hidden">
-            <span className="flex size-8 items-center justify-center rounded-[5px] bg-forest font-display text-paper">X</span>
-            <span className="font-display text-lg">Visionary X</span>
+          <div className="mb-10 lg:hidden">
+            <BrandLockup size={32} sub="Operations" />
           </div>
-          <h1 className="font-display text-[30px] leading-tight text-ink" style={{ fontVariationSettings: '"opsz" 72' }}>{title}</h1>
-          {subtitle && <p className="mt-2 text-[13.5px] text-muted">{subtitle}</p>}
+          <h1 className="display text-[34px] text-ink">{title}</h1>
+          {subtitle && <p className="mt-3 text-[13.5px] text-ink-2">{subtitle}</p>}
           <div className="mt-8">{children}</div>
           {footer && <div className="mt-8 border-t border-line pt-5 text-[13px] text-muted">{footer}</div>}
         </div>

@@ -59,3 +59,7 @@ A project can be set to Completed only when no tasks are open and no deliverable
 ## Notifications
 
 In-app notifications for assignments, due-tomorrow and overdue tasks (daily 08:00 IST, de-duplicated per task per day; managers weekly), review requests, approvals, revision requests, milestone outcomes, client feedback and decisions, leave requests/decisions, calendar invitations/changes/cancellations, comments on your tasks and security events. Users can mute any kind except security notices.
+
+## Automations (`worker/services/automations.ts`)
+
+State-based rules run after every task/milestone change and from the daily cron; each can be disabled in Settings → Automations and every action is logged as an `automation.*` activity (actor = system) with an `Automation:` note in status history. See [WORKFLOW.md](WORKFLOW.md#5-what-the-software-does-automatically) for the full list. The project review state is only undone automatically when the automation itself set it.

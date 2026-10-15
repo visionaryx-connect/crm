@@ -10,6 +10,7 @@ import { bytes, fmtDate, fmtDateTime, hours, relative, todayIST } from '@/lib/fo
 import { Avatar, Badge, Button, Dialog, ErrorState, Field, IconButton, Input, KeyValue, PageHeader, Panel, Section, SkeletonRows, Tabs, Textarea, cx } from '@/components/ui'
 import { DueText, PriorityMark, TaskStatusBadge } from '@/components/status'
 import { TaskDialog } from '@/components/TaskDialog'
+import { GuideLink, NextStep, Stepper, TASK_STEPS, taskGuidance } from '@/components/Workflow'
 import { UploadButton } from './project/Panels'
 import type { ProjectData } from './project/types'
 
@@ -98,7 +99,15 @@ export default function TaskDetail() {
         }
       />
 
-      {t.status === 'blocked' && t.blocked_reason && <div className="mb-6 rounded-lg border border-danger/25 bg-danger-bg px-4 py-3 text-[13px] text-danger"><span className="font-medium">Blocked:</span> {t.blocked_reason}</div>}
+      {(() => {
+        const g = taskGuidance({ status: t.status, requiresApproval: t.requires_approval, isAssignee: a.isAssignee, canReview: a.canReview, canEdit: a.canEdit, openDependencies: depsOpen.length, blockedReason: t.blocked_reason, hasPendingSubmission: Boolean(pendingSub) })
+        return (
+          <section className="mb-8" aria-label="Where this task is">
+            {g.current >= 0 && <Stepper steps={TASK_STEPS} current={g.current} warning={g.warning} />}
+            <NextStep title={g.title} body={g.body} auto={g.auto} action={<GuideLink />} />
+          </section>
+        )
+      })()}
       {depsOpen.length > 0 && open && <div className="mb-6 flex items-center gap-2 rounded-lg border border-warn/30 bg-warn-bg px-4 py-3 text-[13px] text-warn"><Link2 className="size-4" />Waiting on {depsOpen.map((x) => <Link key={x.id} to={`/tasks/${x.id}`} className="underline">#{x.number} {x.title}</Link>)}</div>}
       {t.status === 'in_review' && pendingSub && <div className="mb-6 rounded-lg border border-info/25 bg-info-bg px-4 py-3 text-[13px] text-info"><span className="font-medium">Awaiting review</span> — submitted by {pendingSub.submitted_by_name} {relative(pendingSub.submitted_at)}{pendingSub.note && <>: “{pendingSub.note}”</>}</div>}
 
@@ -112,7 +121,7 @@ export default function TaskDetail() {
             <Panel className="divide-y divide-line/70">
               {d.subtasks.map((s) => (
                 <div key={s.id} className="flex items-center gap-3 px-4 py-2">
-                  <input type="checkbox" className="size-4 accent-forest" checked={s.done} disabled={!a.canUpdateStatus} onChange={(e) => toggleSub.mutate({ sid: s.id, done: e.target.checked })} aria-label={s.title} />
+                  <input type="checkbox" className="size-4 accent-accent" checked={s.done} disabled={!a.canUpdateStatus} onChange={(e) => toggleSub.mutate({ sid: s.id, done: e.target.checked })} aria-label={s.title} />
                   <span className={cx('flex-1 text-[13px]', s.done ? 'text-muted line-through' : 'text-ink')}>{s.title}</span>
                   {s.done && s.done_by_name && <span className="text-[11px] text-faint">{s.done_by_name}</span>}
                   {a.canUpdateStatus && <IconButton label="Remove item" onClick={() => delSub.mutate(s.id)}><Trash2 className="size-3.5" /></IconButton>}
@@ -133,7 +142,7 @@ export default function TaskDetail() {
               {d.comments.map((c) => (
                 <div key={c.id} className="flex gap-3">
                   <Avatar name={c.author_name} color={c.avatar_color} size={28} />
-                  <div className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3.5 py-2.5">
+                  <div className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3.5 py-2.5">
                     <div className="flex items-center gap-2 text-[12px]"><span className="font-medium text-ink">{c.author_name}</span><span className="text-muted">{relative(c.created_at)}</span>{c.author_id === me.user.id && <button className="ml-auto text-faint hover:text-danger" aria-label="Delete comment" onClick={() => delComment.mutate(c.id)}><Trash2 className="size-3.5" /></button>}</div>
                     <p className="mt-1 whitespace-pre-wrap text-[13.5px] text-ink-2">{c.body}</p>
                   </div>
@@ -156,7 +165,7 @@ export default function TaskDetail() {
             <div className="pt-3">
               {histTab === 'submissions' && (d.submissions.length === 0 ? <p className="text-[13px] text-muted">Not submitted yet.</p> : (
                 <ol className="space-y-2">{d.submissions.map((s) => (
-                  <li key={s.id} className="rounded-md border border-line bg-paper px-3.5 py-2.5 text-[13px]">
+                  <li key={s.id} className="rounded-md border border-line bg-surface px-3.5 py-2.5 text-[13px]">
                     <div className="flex flex-wrap items-center gap-2"><span className="font-medium">{s.submitted_by_name}</span><span className="text-muted">submitted {fmtDateTime(s.submitted_at)}</span>
                       <Badge tone={s.decision === 'approved' ? 'ok' : s.decision === 'revision_requested' ? 'warn' : s.decision === 'withdrawn' ? 'outline' : 'info'} className="ml-auto">{s.decision.replace('_', ' ')}</Badge></div>
                     {s.note && <p className="mt-1 text-ink-2">{s.note}</p>}
@@ -203,7 +212,7 @@ export default function TaskDetail() {
             <div className="mb-2 flex items-center justify-between"><span className="eyebrow">Attachments</span>{a.canContribute && <UploadButton projectId={t.project_id} taskId={t.id} label="Attach" onDone={() => q.refetch()} />}</div>
             {d.attachments.length === 0 ? <p className="text-[13px] text-muted">No files.</p> : (
               <ul className="space-y-1.5">{d.attachments.map((f) => (
-                <li key={f.id} className="flex items-center gap-2 text-[12.5px]"><a href={`/api/files/${f.id}/download`} className="min-w-0 flex-1 truncate text-ink hover:underline">{f.file_name}</a><span className="text-muted">{bytes(f.size_bytes)}</span><a href={`/api/files/${f.id}/download`} aria-label={`Download ${f.file_name}`}><Download className="size-3.5 text-forest" /></a></li>
+                <li key={f.id} className="flex items-center gap-2 text-[12.5px]"><a href={`/api/files/${f.id}/download`} className="min-w-0 flex-1 truncate text-ink hover:underline">{f.file_name}</a><span className="text-muted">{bytes(f.size_bytes)}</span><a href={`/api/files/${f.id}/download`} aria-label={`Download ${f.file_name}`}><Download className="size-3.5 text-accent" /></a></li>
               ))}</ul>
             )}
           </Panel>

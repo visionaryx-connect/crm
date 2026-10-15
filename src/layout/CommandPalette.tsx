@@ -60,7 +60,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   return (
     <dialog ref={dialogRef} onClose={onClose} onCancel={(e) => { e.preventDefault(); onClose() }} onClick={(e) => e.target === dialogRef.current && onClose()} className="mx-auto mt-[12vh] w-[calc(100vw-32px)] max-w-[580px] bg-transparent p-0">
       {open && (
-        <div className="overflow-hidden rounded-lg border border-line bg-paper shadow-pop animate-rise">
+        <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-pop animate-rise">
           <div className="flex items-center gap-2.5 border-b border-line px-4">
             <Search className="size-4 text-muted" />
             <input
@@ -88,7 +88,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
               const Icon = ICON[r.type]
               return (
                 <li key={`${r.type}-${r.id}`} role="option" aria-selected={i === active}>
-                  <button onMouseEnter={() => setActive(i)} onClick={() => go(r)} className={cx('flex w-full items-center gap-3 rounded-md px-3 py-2 text-left', i === active && 'bg-forest-50')}>
+                  <button onMouseEnter={() => setActive(i)} onClick={() => go(r)} className={cx('flex w-full items-center gap-3 rounded-md px-3 py-2 text-left', i === active && 'bg-accent-faint')}>
                     <Icon className="size-4 shrink-0 text-muted" strokeWidth={1.7} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[13.5px] text-ink">{r.title}</span>

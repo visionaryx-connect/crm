@@ -88,7 +88,7 @@ function PortalLinkDialog({ data, open, onClose }: { data: ClientData; open: boo
       {created ? (
         <div className="space-y-3">
           <p className="text-[13px] text-ink-2">Copy this link now and send it to the client through a trusted channel. For security it is shown only once and is stored only as a hash.</p>
-          <div className="flex items-center gap-2 rounded-md border border-line bg-ivory p-2">
+          <div className="flex items-center gap-2 rounded-md border border-line bg-canvas p-2">
             <code className="flex-1 break-all font-mono text-[12px]">{created.link}</code>
             <IconButton label="Copy link" onClick={() => { navigator.clipboard.writeText(created.link); toast({ tone: 'ok', title: 'Link copied' }) }}><Copy className="size-4" /></IconButton>
           </div>
@@ -136,7 +136,7 @@ export default function ClientDetail() {
       <PageHeader
         eyebrow={<Link to="/clients" className="hover:underline">Clients · {c.reference}</Link>}
         title={<span className="inline-flex items-center gap-3">{c.name}{c.is_seed && <SampleTag />}</span>}
-        meta={<><ClientStatusBadge status={c.status} />{c.industry && <span>{c.industry}</span>}<span>Account manager: <span className="text-ink">{c.account_manager_name ?? 'Unassigned'}</span></span>{d.pendingClientApprovals > 0 && <Badge tone="gold">{d.pendingClientApprovals} awaiting client approval</Badge>}</>}
+        meta={<><ClientStatusBadge status={c.status} />{c.industry && <span>{c.industry}</span>}<span>Account manager: <span className="text-ink">{c.account_manager_name ?? 'Unassigned'}</span></span>{d.pendingClientApprovals > 0 && <Badge tone="highlight">{d.pendingClientApprovals} awaiting client approval</Badge>}</>}
         actions={
           <>
             <Link to={`/reports?type=client&scopeId=${c.id}`}><Button icon={<BarChart3 className="size-4" />}>Report</Button></Link>
@@ -176,8 +176,8 @@ export default function ClientDetail() {
             <Section title="Pending feedback & revisions">
               {d.openFeedback.length === 0 ? <p className="text-[13px] text-muted">Nothing outstanding.</p> : (
                 <ul className="space-y-2">{d.openFeedback.map((f) => (
-                  <li key={f.id}><Link to={`/projects/${f.project_id}?tab=feedback`} className="block rounded-md border border-line bg-paper px-3 py-2 hover:border-line-strong">
-                    <div className="flex items-center gap-2 text-[12px] text-muted"><Badge tone={f.kind === 'revision_request' ? 'warn' : 'gold'}>{f.kind.replace('_', ' ')}</Badge>{f.project_name} · {f.author_name} · {relative(f.created_at)}</div>
+                  <li key={f.id}><Link to={`/projects/${f.project_id}?tab=feedback`} className="block rounded-md border border-line bg-surface px-3 py-2 hover:border-line-strong">
+                    <div className="flex items-center gap-2 text-[12px] text-muted"><Badge tone={f.kind === 'revision_request' ? 'warn' : 'highlight'}>{f.kind.replace('_', ' ')}</Badge>{f.project_name} · {f.author_name} · {relative(f.created_at)}</div>
                     <p className="mt-1 text-[13px] text-ink">{f.body}</p>
                   </Link></li>
                 ))}</ul>
@@ -192,7 +192,7 @@ export default function ClientDetail() {
                 { label: 'Phone', value: c.phone },
                 { label: 'Website', value: c.website ? <a className="link" href={c.website} target="_blank" rel="noreferrer noopener">{c.website}</a> : null },
                 { label: 'Address', value: c.address },
-                { label: 'Services', value: d.services.length ? <div className="flex flex-wrap gap-1">{d.services.map((s) => <Badge key={s.id} tone="forest">{s.name}</Badge>)}</div> : null },
+                { label: 'Services', value: d.services.length ? <div className="flex flex-wrap gap-1">{d.services.map((s) => <Badge key={s.id} tone="accent">{s.name}</Badge>)}</div> : null },
                 { label: 'Client since', value: fmtDate(c.created_at) },
               ]} />
             </Panel>
@@ -209,14 +209,14 @@ export default function ClientDetail() {
                 <Panel key={ct.id} className="p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium text-ink">{ct.name} {ct.is_primary ? <Badge tone="gold" className="ml-1">Primary</Badge> : null}</p>
+                      <p className="font-medium text-ink">{ct.name} {ct.is_primary ? <Badge tone="highlight" className="ml-1">Primary</Badge> : null}</p>
                       <p className="text-[12.5px] text-muted">{ct.title ?? '—'}</p>
                     </div>
                     {d.can.manage && <div className="flex"><IconButton label="Edit contact" onClick={() => setContact(ct)}><Pencil className="size-3.5" /></IconButton><IconButton label="Remove contact" onClick={() => delContact.mutate(ct.id)}><Trash2 className="size-3.5" /></IconButton></div>}
                   </div>
                   <div className="mt-3 space-y-1 text-[13px]">
-                    {ct.email && <a href={`mailto:${ct.email}`} className="flex items-center gap-2 text-ink-2 hover:text-forest"><Mail className="size-3.5" />{ct.email}</a>}
-                    {ct.phone && <a href={`tel:${ct.phone}`} className="flex items-center gap-2 text-ink-2 hover:text-forest"><Phone className="size-3.5" />{ct.phone}</a>}
+                    {ct.email && <a href={`mailto:${ct.email}`} className="flex items-center gap-2 text-ink-2 hover:text-accent"><Mail className="size-3.5" />{ct.email}</a>}
+                    {ct.phone && <a href={`tel:${ct.phone}`} className="flex items-center gap-2 text-ink-2 hover:text-accent"><Phone className="size-3.5" />{ct.phone}</a>}
                   </div>
                 </Panel>
               ))}
@@ -231,7 +231,7 @@ export default function ClientDetail() {
             <ol className="relative ml-2 space-y-5 border-l border-line pl-6">
               {d.interactions.map((i) => (
                 <li key={i.id} className="relative">
-                  <span className="absolute -left-[29px] top-1 size-2.5 rounded-full bg-gold ring-4 ring-ivory" aria-hidden />
+                  <span className="absolute -left-[29px] top-1 size-2.5 rounded-full bg-highlight ring-4 ring-canvas" aria-hidden />
                   <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted"><Badge tone="outline">{i.kind}</Badge>{fmtDateTime(i.occurred_at)} · {i.created_by_name}</div>
                   <p className="mt-1 font-medium text-ink">{i.subject}</p>
                   {i.body && <p className="mt-1 whitespace-pre-wrap text-[13px] text-ink-2">{i.body}</p>}

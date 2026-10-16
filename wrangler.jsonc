@@ -127,12 +127,9 @@
 					"migrations_dir": "migrations"
 				}
 			],
-			"r2_buckets": [
-				{
-					"binding": "FILES",
-					"bucket_name": "visionaryx-ops-files"
-				}
-			],
+			// R2 is not enabled on this account yet, so file uploads are off in production.
+			// To turn them on: enable R2 in the dashboard, run `npx wrangler r2 bucket create visionaryx-ops-files`,
+			// add back: "r2_buckets": [{ "binding": "FILES", "bucket_name": "visionaryx-ops-files" }], then rebuild and deploy.
 			"durable_objects": {
 				"bindings": [
 					{

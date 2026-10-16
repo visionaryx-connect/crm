@@ -70,12 +70,12 @@
 		"staging": {
 			"vars": {
 				"APP_ENV": "staging",
-				"APP_ORIGIN": "https://ops-staging.visionary-x.in",
+				"APP_ORIGIN": "https://crm-staging.visionary-x.in",
 				"COMPANY_TIMEZONE": "Asia/Kolkata"
 			},
 			"routes": [
 				{
-					"pattern": "ops-staging.visionary-x.in",
+					"pattern": "crm-staging.visionary-x.in",
 					"custom_domain": true
 				}
 			],
@@ -110,12 +110,12 @@
 		"production": {
 			"vars": {
 				"APP_ENV": "production",
-				"APP_ORIGIN": "https://ops.visionary-x.in",
+				"APP_ORIGIN": "https://crm.visionary-x.in",
 				"COMPANY_TIMEZONE": "Asia/Kolkata"
 			},
 			"routes": [
 				{
-					"pattern": "ops.visionary-x.in",
+					"pattern": "crm.visionary-x.in",
 					"custom_domain": true
 				}
 			],

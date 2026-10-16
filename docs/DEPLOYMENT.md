@@ -61,7 +61,7 @@ Never run `scripts/seed.mjs` against production. Create the first Super Admin wi
 Generate a one-time activation link for the founder (writes nothing but a user, a profile, the role and an activation token):
 
 ```bash
-node scripts/bootstrap-admin.mjs --name "Founder Name" --email founder@visionary-x.in --code VX-001 --origin https://ops.visionary-x.in > bootstrap.sql
+node scripts/bootstrap-admin.mjs --name "Founder Name" --email founder@visionary-x.in --code VX-001 --origin https://crm.visionary-x.in > bootstrap.sql
 ```
 
 ```bash
@@ -84,7 +84,7 @@ The Vite Cloudflare plugin writes the resolved environment config into `dist/`, 
 
 ## 5. Custom domain
 
-`routes` in each environment uses `custom_domain: true` for `ops.visionary-x.in` / `ops-staging.visionary-x.in`. The `visionary-x.in` zone must be on the same Cloudflare account; the certificate is issued automatically. Keep the marketing site on the apex domain and the application on the subdomain. After choosing the final hostname, update `APP_ORIGIN` to match exactly — WebSocket upgrades and mutating requests are rejected from any other origin.
+`routes` in each environment uses `custom_domain: true` for `crm.visionary-x.in` / `crm-staging.visionary-x.in`. The `visionary-x.in` zone must be on the same Cloudflare account; the certificate is issued automatically. Keep the marketing site on the apex domain and the application on the subdomain. After choosing the final hostname, update `APP_ORIGIN` to match exactly — WebSocket upgrades and mutating requests are rejected from any other origin.
 
 Recommended zone settings: *Always Use HTTPS* on, minimum TLS 1.2, HSTS (already sent by `_headers`), and a WAF rate-limiting rule on `/api/auth/*` and `/api/portal/session` as a second layer above the app's own limiter.
 

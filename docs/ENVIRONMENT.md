@@ -5,7 +5,7 @@ Three environments share one codebase. Non-secret values live in `wrangler.jsonc
 | Name | Kind | development (local) | staging | production |
 |---|---|---|---|---|
 | `APP_ENV` | var | `development` | `staging` | `production` |
-| `APP_ORIGIN` | var | `http://localhost:5173` | `https://ops-staging.visionary-x.in` | `https://ops.visionary-x.in` |
+| `APP_ORIGIN` | var | `http://localhost:5173` | `https://crm-staging.visionary-x.in` | `https://crm.visionary-x.in` |
 | `COMPANY_TIMEZONE` | var | `Asia/Kolkata` | `Asia/Kolkata` | `Asia/Kolkata` |
 | `SESSION_SECRET` | **secret** | `.dev.vars` | `wrangler secret put … --env staging` | `wrangler secret put … --env production` |
 | `DATA_KEY` | **secret** | `.dev.vars` | `wrangler secret put … --env staging` | `wrangler secret put … --env production` |

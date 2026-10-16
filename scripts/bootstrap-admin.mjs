@@ -1,5 +1,5 @@
 // Creates the first Super Admin for a fresh database and prints a one-time activation link.
-// Usage: node scripts/bootstrap-admin.mjs --name "Full Name" --email you@visionary-x.in --code VX-001 --origin https://ops.visionary-x.in > bootstrap.sql
+// Usage: node scripts/bootstrap-admin.mjs --name "Full Name" --email you@visionary-x.in --code VX-001 --origin https://crm.visionary-x.in > bootstrap.sql
 // The SQL goes to stdout; the activation link goes to stderr (so it is not written into the SQL file).
 import { createHash, randomBytes } from 'node:crypto'
 

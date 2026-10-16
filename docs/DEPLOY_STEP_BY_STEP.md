@@ -1,6 +1,6 @@
 # Deploying Visionary X Operations to Cloudflare — step by step
 
-This guide takes you from a fresh Cloudflare login to a live system at **https://ops.visionary-x.in**, with the first Super Admin signed in. It takes about 30–45 minutes the first time. Run every command from the project folder (`VisionaryX/CRM`) in a terminal.
+This guide takes you from a fresh Cloudflare login to a live system at **https://crm.visionary-x.in**, with the first Super Admin signed in. It takes about 30–45 minutes the first time. Run every command from the project folder (`VisionaryX/CRM`) in a terminal.
 
 The commands were checked against this project with Wrangler 4.151: the production build, a dry-run deploy, migrations and backup.
 
@@ -9,7 +9,7 @@ The commands were checked against this project with Wrangler 4.151: the producti
 > - One D1 database, `visionaryx-ops`.
 > - One Durable Object for live updates, created automatically.
 > - Optionally, one R2 bucket for files, `visionaryx-ops-files`.
-> - The custom domain `ops.visionary-x.in`.
+> - The custom domain `crm.visionary-x.in`.
 
 ---
 
@@ -17,7 +17,7 @@ The commands were checked against this project with Wrangler 4.151: the producti
 
 | You need | Why / how to check |
 |---|---|
-| Access to the **Cloudflare account that holds `visionary-x.in`** | The domain is already on Cloudflare (nameservers `ben`/`dorthy.ns.cloudflare.com`). The app must be deployed to that **same** account to use `ops.visionary-x.in`. |
+| Access to the **Cloudflare account that holds `visionary-x.in`** | The domain is already on Cloudflare (nameservers `ben`/`dorthy.ns.cloudflare.com`). The app must be deployed to that **same** account to use `crm.visionary-x.in`. |
 | **Node.js 22.18+** (24 recommended) and npm | `node -v` |
 | The project dependencies installed | `npm install` |
 | A password manager entry for the secrets | You'll store two secrets and the backup location there. |
@@ -91,16 +91,16 @@ The app still works; upload buttons show "File storage (R2) is not configured".
 
 ## Step 4 — Confirm the web address
 
-The app is configured for **`ops.visionary-x.in`**. In `wrangler.jsonc` → `env.production`, these two values must match exactly:
+The app is configured for **`crm.visionary-x.in`**. In `wrangler.jsonc` → `env.production`, these two values must match exactly:
 
 ```jsonc
-"vars": { "APP_ENV": "production", "APP_ORIGIN": "https://ops.visionary-x.in", ... },
-"routes": [{ "pattern": "ops.visionary-x.in", "custom_domain": true }],
+"vars": { "APP_ENV": "production", "APP_ORIGIN": "https://crm.visionary-x.in", ... },
+"routes": [{ "pattern": "crm.visionary-x.in", "custom_domain": true }],
 ```
 
 To use a different subdomain (for example `crm.visionary-x.in`), change it in **both** places. `APP_ORIGIN` is checked on every form submission and live connection, so a mismatch blocks saving.
 
-In the Cloudflare dashboard → **visionary-x.in → DNS**, make sure there is **no existing record** named `ops` (or your chosen name). Cloudflare creates it automatically in Step 7 and refuses if one already exists. Your main website on `visionary-x.in` is not affected.
+In the Cloudflare dashboard → **visionary-x.in → DNS**, make sure there is **no existing record** named `crm` (or your chosen name). Cloudflare creates it automatically in Step 7 and refuses if one already exists. Your main website on `visionary-x.in` is not affected.
 
 ---
 
@@ -146,7 +146,7 @@ It should list `REALTIME` (Durable Object), `DB` (D1), `FILES` (R2, if you kept 
 npx wrangler deploy
 ```
 
-This uploads the Worker and website and creates the Durable Object, the daily 08:00 IST schedule and the `ops.visionary-x.in` domain with its HTTPS certificate. The certificate can take a few minutes the very first time.
+This uploads the Worker and website and creates the Durable Object, the daily 08:00 IST schedule and the `crm.visionary-x.in` domain with its HTTPS certificate. The certificate can take a few minutes the very first time.
 
 ---
 
@@ -177,12 +177,12 @@ Each `secret put` makes the new value live immediately. Wrangler prints a warnin
 ## Step 9 — Check it's running
 
 ```bash
-curl https://ops.visionary-x.in/api/health
+curl https://crm.visionary-x.in/api/health
 ```
 
 Expected: `{"ok":true,"env":"production",…,"r2":true}` (`r2` is `false` if you chose Option B).
 
-Open **https://ops.visionary-x.in** in a browser. You should see the dark Visionary X sign-in page.
+Open **https://crm.visionary-x.in** in a browser. You should see the dark Visionary X sign-in page.
 
 ---
 
@@ -191,7 +191,7 @@ Open **https://ops.visionary-x.in** in a browser. You should see the dark Vision
 Generate a one-time setup file and activation link (replace the name, email and employee ID):
 
 ```bash
-node scripts/bootstrap-admin.mjs --name "Your Full Name" --email you@visionary-x.in --code VX-001 --origin https://ops.visionary-x.in > bootstrap.sql
+node scripts/bootstrap-admin.mjs --name "Your Full Name" --email you@visionary-x.in --code VX-001 --origin https://crm.visionary-x.in > bootstrap.sql
 ```
 
 The terminal prints an **activation link**; copy it. Then load the file into the live database and delete it:
@@ -309,7 +309,7 @@ Same steps with staging names: `npx wrangler d1 create visionaryx-ops-staging`. 
 4. Build with `CLOUDFLARE_ENV=staging`.
 5. Set the secrets with `--name visionaryx-ops-staging`.
 
-It runs at `ops-staging.visionary-x.in`.
+It runs at `crm-staging.visionary-x.in`.
 
 ---
 

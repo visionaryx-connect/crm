@@ -53,6 +53,8 @@ If you have several accounts, note the **Account ID** of the one that owns `visi
 npx wrangler d1 create visionaryx-ops
 ```
 
+Wrangler then asks **"Would you like Wrangler to add it on your behalf?" — answer `No`**. Saying yes adds the database to the local-development section under a different name and points your local dev server at the live database.
+
 The output contains a block like `"database_id": "1a2b3c4d-…"`. Open **`wrangler.jsonc`**, find the **`env` → `production`** section, and replace `REPLACE_WITH_PRODUCTION_D1_ID` with that ID:
 
 ```jsonc
@@ -168,7 +170,7 @@ npx wrangler secret put SESSION_SECRET --name visionaryx-ops-production
 npx wrangler secret put DATA_KEY --name visionaryx-ops-production
 ```
 
-Each `secret put` makes the new value live immediately.
+Each `secret put` makes the new value live immediately. Wrangler prints a warning that "multiple environments are defined"; that is expected here, because `--name` already targets the production Worker. Never paste the generated values into chat, email or tickets.
 
 ---
 

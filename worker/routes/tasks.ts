@@ -127,6 +127,43 @@ tasks.get('/', async (c) => {
   })
 })
 
+/** Read-only view of tasks scheduled for a specific company calendar day.
+ * A task is shown on its due date, start date, or across its defined start/due range.
+ * All results obey the existing project-read permission filter.
+ */
+tasks.get('/daily', async (c) => {
+  const auth = c.get('auth')
+  const date = query(c, 'date') || localDate()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date) {
+    throw new ApiError(422, 'VALIDATION_FAILED', 'Date must be a valid YYYY-MM-DD calendar date')
+  }
+  const access = readableProjectsFilter(auth)
+  const rows = await many<{
+    id: string; title: string; project_id: string; project_name: string; project_reference: string;
+    status: string; priority: string; start_date: string | null; due_date: string | null;
+    user_id: string | null; user_name: string | null; avatar_color: string | null
+  }>(
+    c.env.DB,
+    `SELECT t.id, t.title, t.project_id, p.name AS project_name, p.reference AS project_reference,
+            t.status, t.priority, t.start_date, t.due_date,
+            u.id AS user_id, u.name AS user_name, u.avatar_color
+       FROM tasks t
+       JOIN projects p ON p.id = t.project_id
+       LEFT JOIN users u ON u.status = 'active' AND (
+         u.id = t.responsible_id OR EXISTS (
+           SELECT 1 FROM task_assignees ta WHERE ta.task_id = t.id AND ta.user_id = u.id
+         )
+       )
+      WHERE ${access.sql} AND p.archived_at IS NULL AND t.status <> 'cancelled'
+        AND ((t.start_date IS NOT NULL AND t.start_date <= ? AND (t.due_date IS NULL OR t.due_date >= ?))
+          OR t.due_date = ?)
+      ORDER BY u.name, CASE t.priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END, t.title
+      LIMIT 3000`,
+    ...access.params, date, date, date,
+  )
+  return c.json({ date, tasks: rows })
+})
+
 /** Parse one natural-language instruction; never writes data. */
 tasks.post('/ai-preview', async (c) => {
   const auth = c.get('auth')

@@ -2,6 +2,7 @@ import type { RealtimeHub } from './do/RealtimeHub'
 
 export interface Env {
   DB: D1Database
+  AI?: Ai
   /** Optional: R2 bucket for attachments. When unbound, uploads are disabled with a clear error. */
   FILES?: R2Bucket
   REALTIME: DurableObjectNamespace<RealtimeHub>

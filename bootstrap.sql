@@ -1,6 +1,0 @@
--- Bootstrap Super Admin (mohammedriyazs0506@gmail.com). Fails safely if the email already exists.
-INSERT INTO users (id, email, name, status, avatar_color, created_at, updated_at) VALUES ('usr_mvarcga3c4b8b4f2785d29a685de', 'mohammedriyazs0506@gmail.com', 'Mohammed Riyaz S', 'invited', '#1F4D3A', '2026-10-16T09:20:54.890Z', '2026-10-16T09:20:54.890Z');
-INSERT INTO employee_profiles (user_id, employee_code, designation, created_at, updated_at) VALUES ('usr_mvarcga3c4b8b4f2785d29a685de', 'VX-001', 'Founder', '2026-10-16T09:20:54.890Z', '2026-10-16T09:20:54.890Z');
-INSERT INTO user_roles (user_id, role_id, granted_at) VALUES ('usr_mvarcga3c4b8b4f2785d29a685de', 'role_super_admin', '2026-10-16T09:20:54.890Z');
-INSERT INTO auth_tokens (id, user_id, purpose, token_hash, expires_at, created_at) VALUES ('atk_mvarcga4d57a12a676434eba5b55', 'usr_mvarcga3c4b8b4f2785d29a685de', 'activation', 'f3ed63706c9ecfaa76caf8a63601303269859c5b1a05200ec2d5a254be384286', '2026-10-19T09:20:54.891Z', '2026-10-16T09:20:54.890Z');
-INSERT INTO activity_logs (id, category, actor_type, action, entity_type, entity_id, summary, created_at) VALUES ('act_mvarcga4dc5f38456f08a806048c', 'security', 'system', 'user.bootstrapped', 'user', 'usr_mvarcga3c4b8b4f2785d29a685de', 'Bootstrapped Super Admin mohammedriyazs0506@gmail.com', '2026-10-16T09:20:54.890Z');

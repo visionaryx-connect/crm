@@ -21,6 +21,7 @@ const ClientDetail = lazy(() => import('@/pages/ClientDetail'))
 const Projects = lazy(() => import('@/pages/Projects'))
 const ProjectWorkspace = lazy(() => import('@/pages/ProjectWorkspace'))
 const MyWork = lazy(() => import('@/pages/MyWork'))
+const DailyTasks = lazy(() => import('@/pages/DailyTasks'))
 const TaskDetail = lazy(() => import('@/pages/TaskDetail'))
 const CalendarPage = lazy(() => import('@/pages/Calendar'))
 const Team = lazy(() => import('@/pages/Team'))
@@ -87,6 +88,7 @@ function Workspace() {
               <Route path="projects" element={<Projects />} />
               <Route path="projects/:id" element={<ProjectWorkspace />} />
               <Route path="tasks" element={<MyWork />} />
+              <Route path="today" element={<DailyTasks />} />
               <Route path="tasks/:id" element={<TaskDetail />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="team" element={<RequirePerm perms={['team.read']}><Team /></RequirePerm>} />

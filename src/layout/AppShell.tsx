@@ -26,6 +26,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     items: [
       { to: '/', label: 'Overview', icon: LayoutGrid, end: true },
       { to: '/tasks', label: 'My work', icon: ClipboardCheck },
+      { to: '/today', label: "Today's tasks", icon: CalendarDays },
       { to: '/projects', label: 'Projects', icon: FolderKanban },
       { to: '/clients', label: 'Clients', icon: Briefcase },
       { to: '/calendar', label: 'Calendar', icon: CalendarDays },

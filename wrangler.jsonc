@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "visionaryx-ops",
+	"name": "visionaryx-ops-production",
 	"main": "worker/index.ts",
 	"compatibility_date": "2026-09-01",
 	"compatibility_flags": [
@@ -68,6 +68,7 @@
 	// Bindings are not inherited between environments, so each one declares its own resources.
 	"env": {
 		"staging": {
+            "ai": { "binding": "AI" },
 			"vars": {
 				"APP_ENV": "staging",
 				"APP_ORIGIN": "https://crm-staging.visionary-x.in",
@@ -108,7 +109,7 @@
 			}
 		},
 		"production": {
-			"vars": {
+            "ai": { "binding": "AI" },			"vars": {
 				"APP_ENV": "production",
 				"APP_ORIGIN": "https://crm.visionary-x.in",
 				"COMPANY_TIMEZONE": "Asia/Kolkata"

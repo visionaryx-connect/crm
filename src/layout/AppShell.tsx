@@ -3,13 +3,14 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Bell, BarChart3, Briefcase, CalendarDays, ChevronsLeft, ChevronsRight, CircleUserRound, ClipboardCheck, FileStack, FolderKanban, LayoutGrid, LogOut, Menu,
-  Compass, Plus, Search, Settings, ShieldCheck, Users, UsersRound, Clock3, X,
+  Compass, Plus, Search, Settings, ShieldCheck, Sparkles, Users, UsersRound, Clock3, X,
 } from 'lucide-react'
 import { api } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { useRealtimeStatus } from '@/lib/realtime'
 import { Avatar, BrandLockup, BrandMark, cx, Kbd } from '@/components/ui'
 import { CommandPalette } from './CommandPalette'
+import { AiTaskDialog } from '@/components/AiTaskDialog'
 
 interface NavItem {
   to: string
@@ -91,7 +92,7 @@ function Sidebar({ collapsed, onToggle, mobile, onNavigate }: { collapsed: boole
             <div key={g.group} className="mb-4">
               {!collapsed && <div className="mb-1 px-4 text-[10px] font-medium uppercase tracking-[0.2em] text-faint">{g.group}</div>}
               <ul className="space-y-px px-2">
-                {items.map((i) => (
+            {items.map((i) => (
                   <li key={i.to}>
                     <NavLink
                       to={i.to}
@@ -190,6 +191,7 @@ function UserMenu() {
 function QuickCreate() {
   const { can } = useAuth()
   const [open, setOpen] = useState(false)
+  const [aiOpen, setAiOpen] = useState(false)
   const nav = useNavigate()
   const items = [
     can('projects.create') && { label: 'New project', to: '/projects?new=1' },
@@ -206,6 +208,8 @@ function QuickCreate() {
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div role="menu" className="absolute right-0 z-40 mt-1 w-48 animate-rise rounded-lg border border-line bg-surface p-1 shadow-pop">
+            <button role="menuitem" onClick={() => { setOpen(false); setAiOpen(true) }} className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-[13px] font-medium hover:bg-canvas"><Sparkles className="size-4" /> Assign task with AI</button>
+            <div className="my-1 border-t border-line" />
             {items.map((i) => (
               <button key={i.to} role="menuitem" onClick={() => { setOpen(false); nav(i.to) }} className="block w-full rounded px-3 py-2 text-left text-[13px] hover:bg-canvas">
                 {i.label}
@@ -214,6 +218,7 @@ function QuickCreate() {
           </div>
         </>
       )}
+      <AiTaskDialog open={aiOpen} onClose={() => setAiOpen(false)} />
     </div>
   )
 }

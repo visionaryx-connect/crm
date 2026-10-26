@@ -412,14 +412,31 @@ async function transition(db: D1Database, t: TransitionCtx, to: TaskStatus, note
     if (deps.length) throw new ApiError(409, 'DEPENDENCIES_OPEN', `Waiting on ${deps.map((d) => `#${d.number}`).join(', ')}`, { dependencies: deps })
   }
   const now = nowIso()
+  const today = localDate()
   const stmts = [
     db.prepare(
       `UPDATE tasks SET status = ?, blocked_reason = ?, updated_at = ?,
+              start_date = CASE
+                WHEN ? = 'in_progress' AND start_date IS NULL THEN ?
+                ELSE start_date
+              END,
               completed_at = CASE WHEN ? = 'completed' THEN ? ELSE NULL END,
               approved_by = CASE WHEN ? = 'completed' THEN approved_by ELSE NULL END,
               cancelled_at = CASE WHEN ? = 'cancelled' THEN ? ELSE NULL END
         WHERE id = ?`,
-    ).bind(to, to === 'blocked' ? blockedReason!.trim() : null, now, to, now, to, to, now, t.task.id),
+    ).bind(
+      to,
+      to === 'blocked' ? blockedReason!.trim() : null,
+      now,
+      to,
+      today,
+      to,
+      now,
+      to,
+      to,
+      now,
+      t.task.id,
+    ),
     db.prepare('INSERT INTO task_status_history (id, task_id, project_id, from_status, to_status, note, changed_by, changed_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
       .bind(newId('tsh'), t.task.id, t.task.project_id, from, to, (to === 'blocked' ? blockedReason : note) ?? '', t.auth.userId, now),
     activity(db, { actorId: t.auth.userId, action: 'task.status_changed', entityType: 'task', entityId: t.task.id, projectId: t.task.project_id, summary: `#${t.task.number} ${TASK_STATUS_LABEL[from]} → ${TASK_STATUS_LABEL[to]}`, changes: { status: { from, to } } }),

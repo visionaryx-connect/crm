@@ -16,7 +16,7 @@ import { notify, projectReviewers } from '../services/notify'
 import { onTaskAssigned } from '../services/automations'
 import { recalcProgress } from '../services/progress'
 import { publish, rooms } from '../services/realtime'
-
+import { resolveRelativeDueDate } from "../utils/aiTaskDates";
 const tasks = new Hono<AppBindings>()
 tasks.use('*', requireStaff())
 
@@ -155,6 +155,11 @@ tasks.post('/ai-preview', async (c) => {
     }) as { response?: string }
     const raw = result.response?.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '') ?? ''
     parsed = JSON.parse(raw)
+    const correctedDueDate = resolveRelativeDueDate(input.prompt)
+
+    if (correctedDueDate) {
+      parsed.dueDate = correctedDueDate
+    }
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('Invalid AI result')
   } catch (err) {
     console.error('AI task preview failure', err)

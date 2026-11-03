@@ -11,6 +11,7 @@ import authRoutes from './routes/auth'
 import adminRoutes from './routes/admin'
 import teamRoutes from './routes/team'
 import clientRoutes from './routes/clients'
+import adRoutes from './routes/ads'
 import projectRoutes from './routes/projects'
 import taskRoutes from './routes/tasks'
 import fileRoutes from './routes/files'
@@ -54,6 +55,7 @@ api.route('/auth', authRoutes)
 api.route('/admin', adminRoutes)
 api.route('/team', teamRoutes)
 api.route('/clients', clientRoutes)
+api.route('/ads', adRoutes)
 api.route('/projects', projectRoutes)
 api.route('/tasks', taskRoutes)
 api.route('/files', fileRoutes)

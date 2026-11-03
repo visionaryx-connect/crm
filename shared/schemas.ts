@@ -2,7 +2,7 @@
 import { z } from 'zod'
 import {
   ATTENDANCE_STATUSES, CLIENT_STATUSES, DELIVERABLE_STATUSES, EVENT_KINDS, HOLIDAY_KINDS, MILESTONE_STATUSES,
-  PRIORITIES, PROJECT_MEMBER_ROLES, PROJECT_STATUSES, TASK_STATUSES,
+  AD_GOALS, AD_METRICS, PRIORITIES, PROJECT_MEMBER_ROLES, PROJECT_STATUSES, TASK_STATUSES,
 } from './constants'
 import { isValidDate } from './dates'
 
@@ -312,3 +312,37 @@ export const feedbackResponseSchema = z.object({
 })
 
 export type LoginInput = z.infer<typeof loginSchema>
+
+// ---- Client ad results ----
+export const adGoalsSchema = z
+  .object({
+    goals: z.array(z.enum(AD_GOALS)).max(AD_GOALS.length),
+    primary: z.enum(AD_GOALS).nullable(),
+  })
+  .refine((v) => (v.goals.length === 0 ? v.primary === null : v.primary !== null && v.goals.includes(v.primary)), {
+    message: 'Pick one of the selected goals as the main goal',
+    path: ['primary'],
+  })
+export const adAccountSchema = z.object({
+  name: req(120, 'Account name'),
+  externalId: z.string().trim().regex(/^act_\d{1,30}$/, 'Use the Meta ad account id, e.g. act_1234567890').nullable().optional(),
+})
+export const adCampaignSchema = z.object({
+  name: req(200, 'Campaign name'),
+  externalId: z.string().trim().max(64).nullable().optional(),
+})
+export const adResultsSchema = z.object({
+  source: z.enum(['manual', 'csv']).default('manual'),
+  rows: z
+    .array(
+      z.object({
+        campaignId: z.string().min(1).max(64),
+        date: dateStr,
+        metric: z.enum(AD_METRICS),
+        value: z.number().finite().min(0).max(1e12),
+      }),
+    )
+    .min(1, 'Add at least one result')
+    .max(2000, 'Upload at most 2,000 rows at a time'),
+})
+export const adPublishSchema = z.object({ through: dateStr.nullable() })

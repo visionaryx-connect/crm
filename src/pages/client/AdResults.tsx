@@ -1,7 +1,9 @@
 // Staff-side "Ad results" tab on the client page: goals, Meta account & campaigns, daily results, publishing.
 import { useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { Plus, Send } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useToast } from '@/components/toast'
+import { Plus, Send, Upload } from 'lucide-react'
+import { parseMetaCsv, type MetaCsvResult } from '@shared/metaCsv'
 import { AD_GOALS, AD_GOAL_LABEL, AD_GOAL_METRIC, AD_METRICS, AD_METRIC_LABEL, type AdGoal, type AdMetric } from '@shared/constants'
 import { api, ApiError } from '@/lib/api'
 import { useAction } from '@/lib/forms'
@@ -131,12 +133,81 @@ function ResultsDialog({ clientId, data, open, onClose }: { clientId: string; da
   )
 }
 
+function CsvDialog({ clientId, data, open, onClose }: { clientId: string; data: AdData; open: boolean; onClose: () => void }) {
+  const [accountId, setAccountId] = useState(data.accounts[0]?.id ?? '')
+  const [fileName, setFileName] = useState('')
+  const [parsed, setParsed] = useState<MetaCsvResult | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const qc = useQueryClient()
+  const toast = useToast()
+  const known = new Map(data.campaigns.filter((k) => k.ad_account_id === accountId).map((k) => [k.name.trim().toLowerCase(), k.id]))
+  const newCampaigns = parsed?.campaigns.filter((n) => !known.has(n.toLowerCase())) ?? []
+  const dates = parsed?.rows.map((r) => r.date).sort() ?? []
+
+  const onFile = async (f: File | undefined) => {
+    setError('')
+    setParsed(null)
+    if (!f) return
+    if (f.size > 5 * 1024 * 1024) return setError('That file is larger than 5 MB. Export a shorter date range.')
+    setFileName(f.name)
+    setParsed(parseMetaCsv(await f.text()))
+  }
+
+  const run = async () => {
+    if (!parsed) return
+    setBusy(true)
+    setError('')
+    try {
+      const ids = new Map(known)
+      for (const name of newCampaigns) {
+        const r = await api.post<{ id: string }>(`/api/ads/accounts/${accountId}/campaigns`, { name })
+        ids.set(name.toLowerCase(), r.id)
+      }
+      const rows = parsed.rows.map((r) => ({ campaignId: ids.get(r.campaign.toLowerCase())!, date: r.date, metric: r.metric, value: r.value }))
+      for (let i = 0; i < rows.length; i += 2000) await api.put(`/api/ads/clients/${clientId}/results`, { source: 'csv', rows: rows.slice(i, i + 2000) })
+      toast({ tone: 'ok', title: `Imported ${rows.length.toLocaleString('en-IN')} results` })
+      onClose()
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Import failed. Nothing after the last saved batch was imported.')
+    } finally {
+      setBusy(false)
+      qc.invalidateQueries({ queryKey: ['ads', clientId] })
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose} title="Upload Meta Ads CSV" footer={<><Button variant="ghost" onClick={onClose}>Cancel</Button><Button variant="primary" loading={busy} disabled={!parsed || parsed.rows.length === 0 || !accountId} onClick={run}>Import</Button></>}>
+      <div className="space-y-4">
+        <p className="text-[13px] text-ink-2">In Ads Manager: open <span className="text-ink">Reports</span>, set <span className="text-ink">Breakdown → By time → Day</span>, then <span className="text-ink">Export table data → .csv</span>. Re-uploading the same days replaces their numbers.</p>
+        <Field label="Ad account"><Select value={accountId} onChange={(e) => setAccountId(e.target.value)}>{data.accounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</Select></Field>
+        <Field label="CSV file"><Input type="file" accept=".csv,text/csv" onChange={(e) => onFile(e.target.files?.[0])} /></Field>
+        {parsed && (
+          <Panel className="p-3 text-[13px]">
+            <p className="font-medium text-ink">{fileName}</p>
+            {parsed.rows.length > 0 && (
+              <ul className="mt-2 space-y-1 text-ink-2">
+                <li>{parsed.rows.length.toLocaleString('en-IN')} results from {fmtDate(dates[0])} to {fmtDate(dates[dates.length - 1])}</li>
+                <li>Columns: {parsed.columns.map((m) => AD_METRIC_LABEL[m].label).join(', ')}</li>
+                <li>{parsed.campaigns.length} campaign(s){newCampaigns.length > 0 && <> · <span className="text-ink">{newCampaigns.length} new, will be added:</span> {newCampaigns.join(', ')}</>}</li>
+              </ul>
+            )}
+            {parsed.warnings.map((w) => <p key={w} className="mt-2 text-warn">{w}</p>)}
+          </Panel>
+        )}
+        {error && <p className="text-[13px] text-danger">{error}</p>}
+      </div>
+    </Dialog>
+  )
+}
+
 export default function AdResults({ clientId, canManage }: { clientId: string; canManage: boolean }) {
   const [month, setMonth] = useState(todayIST().slice(0, 7))
   const from = monthStart(`${month}-01`)
   const to = monthEnd(from)
   const q = useQuery({ queryKey: ['ads', clientId, month], queryFn: () => api.get<AdData>(`/api/ads/clients/${clientId}?from=${from}&to=${to}`) })
   const [entering, setEntering] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [through, setThrough] = useState('')
   const publish = useAction((t: string | null) => api.post(`/api/ads/clients/${clientId}/publish`, { through: t }), { success: 'Portal updated', invalidate: [['ads', clientId]] })
 
@@ -167,7 +238,7 @@ export default function AdResults({ clientId, canManage }: { clientId: string; c
         <Section
           title="Results"
           description="Daily numbers from Meta. Clients never see spend or cost figures."
-          actions={<div className="flex items-center gap-2"><Input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} className="w-40" />{canManage && d.campaigns.length > 0 && <Button size="sm" variant="primary" icon={<Plus className="size-3.5" />} onClick={() => setEntering(true)}>Enter results</Button>}</div>}
+          actions={<div className="flex items-center gap-2"><Input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} className="w-40" />{canManage && d.accounts.length > 0 && <Button size="sm" icon={<Upload className="size-3.5" />} onClick={() => setUploading(true)}>Upload CSV</Button>}{canManage && d.campaigns.length > 0 && <Button size="sm" variant="primary" icon={<Plus className="size-3.5" />} onClick={() => setEntering(true)}>Enter results</Button>}</div>}
         >
           {d.results.length === 0 ? (
             <EmptyState title="No results for this month" body={d.campaigns.length === 0 ? 'Link the Meta ad account and add a campaign first.' : 'Enter the numbers from Meta Ads Manager.'} />
@@ -206,6 +277,7 @@ export default function AdResults({ clientId, canManage }: { clientId: string; c
         <GoalsPanel key={d.goals.map((g) => g.goal).join()} clientId={clientId} data={d} canManage={canManage} />
         <AccountsPanel clientId={clientId} data={d} canManage={canManage} />
       </aside>
+      {uploading && <CsvDialog clientId={clientId} data={d} open onClose={() => setUploading(false)} />}
       {entering && <ResultsDialog clientId={clientId} data={d} open onClose={() => setEntering(false)} />}
     </div>
   )

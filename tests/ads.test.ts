@@ -85,3 +85,74 @@ describe('client ad results (staff)', () => {
     expect((await call(admin.agent, 'POST', `/api/ads/clients/${clientId}/accounts`, { name: 'B', externalId: ext })).status).toBe(409)
   })
 })
+
+async function openPortalFor(admin: Awaited<ReturnType<typeof as>>, clientId: string) {
+  const link = await call(admin.agent, 'POST', `/api/clients/${clientId}/portal-links`, { label: 'Ads', validDays: 7 })
+  expect(link.status).toBe(201)
+  const token = new URL(link.json.link).hash.replace('#t=', '')
+  const agent = { cookie: '', csrf: '' }
+  expect((await call(agent, 'POST', '/api/portal/session', { token })).status).toBe(200)
+  return agent
+}
+
+describe('client ad results (portal)', () => {
+  it('never returns spend, and only shows published days', async () => {
+    const { admin, clientId, campaignId } = await setup()
+    await call(admin.agent, 'PUT', `/api/ads/clients/${clientId}/goals`, { goals: ['website_visits'], primary: 'website_visits' })
+    await call(admin.agent, 'PUT', `/api/ads/clients/${clientId}/results`, {
+      rows: [
+        { campaignId, date: '2026-10-01', metric: 'landing_page_views', value: 40 },
+        { campaignId, date: '2026-10-01', metric: 'spend', value: 7777 },
+        { campaignId, date: '2026-10-20', metric: 'landing_page_views', value: 60 },
+        { campaignId, date: '2026-10-20', metric: 'spend', value: 8888 },
+      ],
+    })
+    await call(admin.agent, 'PUT', `/api/ads/clients/${clientId}/notes/2026-10`, { body: 'Launched the Diwali creative.' })
+    const agent = await openPortalFor(admin, clientId)
+
+    const before = await call(agent, 'GET', '/api/portal/ads')
+    expect(before.json.publishedThrough).toBeNull()
+    expect((await call(agent, 'GET', '/api/portal/me')).json.hasAdResults).toBe(false)
+
+    await call(admin.agent, 'POST', `/api/ads/clients/${clientId}/publish`, { through: '2026-10-10' })
+    const r = await call(agent, 'GET', '/api/portal/ads?month=2026-10')
+    expect(r.status).toBe(200)
+    expect(r.json.totals).toEqual({ landing_page_views: 40 })
+    expect(r.json.note.body).toBe('Launched the Diwali creative.')
+    const raw = JSON.stringify(r.json)
+    expect(raw).not.toMatch(/spend|7777|8888/)
+    expect((await call(agent, 'GET', '/api/portal/me')).json.hasAdResults).toBe(true)
+  })
+
+  it("only shows the portal client's own results", async () => {
+    const one = await setup()
+    const two = await setup()
+    await call(two.admin.agent, 'PUT', `/api/ads/clients/${two.clientId}/results`, { rows: [{ campaignId: two.campaignId, date: '2026-10-01', metric: 'follows', value: 99 }] })
+    await call(two.admin.agent, 'POST', `/api/ads/clients/${two.clientId}/publish`, { through: '2026-10-31' })
+    await call(one.admin.agent, 'POST', `/api/ads/clients/${one.clientId}/publish`, { through: '2026-10-31' })
+    const agent = await openPortalFor(one.admin, one.clientId)
+    const r = await call(agent, 'GET', '/api/portal/ads?month=2026-10')
+    expect(r.json.totals).toEqual({})
+    expect(JSON.stringify(r.json)).not.toContain('99')
+  })
+
+  it('compares a partly published month with the same days of the previous month', async () => {
+    const { admin, clientId, campaignId } = await setup()
+    await call(admin.agent, 'PUT', `/api/ads/clients/${clientId}/results`, {
+      rows: [
+        { campaignId, date: '2026-10-01', metric: 'follows', value: 10 },
+        { campaignId, date: '2026-10-02', metric: 'follows', value: 10 },
+        { campaignId, date: '2026-10-25', metric: 'follows', value: 500 },
+        { campaignId, date: '2026-11-01', metric: 'follows', value: 15 },
+        { campaignId, date: '2026-11-02', metric: 'follows', value: 15 },
+      ],
+    })
+    await call(admin.agent, 'POST', `/api/ads/clients/${clientId}/publish`, { through: '2026-11-02' })
+    const agent = await openPortalFor(admin, clientId)
+    const r = await call(agent, 'GET', '/api/portal/ads')
+    expect(r.json.month).toBe('2026-11')
+    expect(r.json.comparedDays).toBe(2)
+    expect(r.json.totals).toEqual({ follows: 30 })
+    expect(r.json.previous).toEqual({ follows: 20 })
+  })
+})

@@ -346,3 +346,5 @@ export const adResultsSchema = z.object({
     .max(2000, 'Upload at most 2,000 rows at a time'),
 })
 export const adPublishSchema = z.object({ through: dateStr.nullable() })
+export const adMonth = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Use a month like 2026-10')
+export const adNoteSchema = z.object({ body: trimmed(4000).default('') })

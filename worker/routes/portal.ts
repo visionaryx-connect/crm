@@ -17,7 +17,8 @@ import { portalDecisionSchema, portalFeedbackSchema, portalReverifySchema } from
 import { activity } from '../lib/audit'
 import { newId, randomToken, sha256Hex } from '../lib/crypto'
 import { many, nowIso, one, placeholders } from '../lib/db'
-import { ApiError, body, clientIp, conflict, notFound } from '../lib/http'
+import { ApiError, body, clientIp, conflict, notFound, query } from '../lib/http'
+import { CLIENT_VISIBLE_AD_METRICS } from '@shared/constants'
 import { rateLimit } from '../lib/ratelimit'
 import { assertCsrf, assertSameOrigin, clearCookie, portalCookieName, setSessionCookie } from '../lib/session'
 import { notify, projectReviewers } from '../services/notify'
@@ -122,7 +123,7 @@ function assertProject(p: PortalAuth, projectId: string) {
 
 portal.get('/me', async (c) => {
   const p = c.get('portal')
-  const client = await one<{ name: string; reference: string }>(c.env.DB, 'SELECT name, reference FROM clients WHERE id = ?', p.clientId)
+  const client = await one<{ name: string; reference: string; ad_results_published_through: string | null }>(c.env.DB, 'SELECT name, reference, ad_results_published_through FROM clients WHERE id = ?', p.clientId)
   const company = await getSetting(c.env.DB, 'company.profile')
   const projects = p.projectIds.length
     ? await many<{ id: string; reference: string; name: string; status: string; progress: number; target_date: string | null; client_status_note: string; manager_name: string | null; manager_email: string | null }>(
@@ -134,13 +135,55 @@ portal.get('/me', async (c) => {
     : []
   const { reverifyMinutes } = await getSetting(c.env.DB, 'portal.defaults')
   return c.json({
-    client,
+    client: { name: client?.name, reference: client?.reference },
+    hasAdResults: Boolean(client?.ad_results_published_through),
     projects,
     support: { company: company.name, email: company.supportEmail || null, phone: company.supportPhone || null, website: company.website },
     csrfToken: p.portalSessionId,
     expiresAt: p.expiresAt,
     verifiedRecently: Date.now() - Date.parse(p.verifiedAt) < reverifyMinutes * 60_000 && Boolean(p.verifiedEmail),
   })
+})
+
+/**
+ * Campaign performance for the client. Only CLIENT_VISIBLE_AD_METRICS are ever selected, so spend (and anything
+ * that could be divided back into spend) cannot leave the server. Only days up to the published date are included.
+ */
+portal.get('/ads', async (c) => {
+  const p = c.get('portal')
+  const client = await one<{ through: string | null }>(c.env.DB, 'SELECT ad_results_published_through AS through FROM clients WHERE id = ?', p.clientId)
+  const through = client?.through ?? null
+  const goals = await many<{ goal: string; is_primary: number }>(c.env.DB, 'SELECT goal, is_primary FROM client_ad_goals WHERE client_id = ? ORDER BY is_primary DESC, goal', p.clientId)
+  if (!through) return c.json({ publishedThrough: null, goals: [], months: [], month: null, totals: {}, previous: {}, daily: [], campaigns: [], note: null })
+  const vis = CLIENT_VISIBLE_AD_METRICS
+  const inVis = `metric IN (${placeholders(vis.length)})`
+  const months = (await many<{ m: string }>(c.env.DB, `SELECT DISTINCT substr(date, 1, 7) AS m FROM ad_results_daily WHERE client_id = ? AND date <= ? AND ${inVis} ORDER BY m DESC LIMIT 36`, p.clientId, through, ...vis)).map((r) => r.m)
+  const asked = query(c, 'month')
+  const month = asked && months.includes(asked) ? asked : months[0] ?? null
+  if (!month) return c.json({ publishedThrough: through, goals: goals.map((g) => ({ goal: g.goal, isPrimary: Boolean(g.is_primary) })), months, month: null, totals: {}, previous: {}, daily: [], campaigns: [], note: null })
+  const [y, mo] = month.split('-').map(Number)
+  const prevMonth = new Date(Date.UTC(y!, mo! - 2, 1)).toISOString().slice(0, 7)
+  // A partly published month is compared with the same days of the previous month, not the whole month.
+  const lastDay = through.startsWith(month) ? Number(through.slice(8, 10)) : 31
+  const sumBy = async (m: string) =>
+    Object.fromEntries((await many<{ metric: string; v: number }>(
+      c.env.DB,
+      `SELECT metric, SUM(value) AS v FROM ad_results_daily WHERE client_id = ? AND date LIKE ? AND date <= ? AND CAST(substr(date, 9, 2) AS INTEGER) <= ? AND ${inVis} GROUP BY metric`,
+      p.clientId, `${m}-%`, through, lastDay, ...vis,
+    )).map((r) => [r.metric, r.v]))
+  const [totals, previous, daily, campaigns, note] = await Promise.all([
+    sumBy(month),
+    sumBy(prevMonth),
+    many(c.env.DB, `SELECT date, metric, SUM(value) AS value FROM ad_results_daily WHERE client_id = ? AND date LIKE ? AND date <= ? AND ${inVis} GROUP BY date, metric ORDER BY date`, p.clientId, `${month}-%`, through, ...vis),
+    many(
+      c.env.DB,
+      `SELECT k.name, r.metric, SUM(r.value) AS value FROM ad_results_daily r JOIN ad_campaigns k ON k.id = r.campaign_id
+        WHERE r.client_id = ? AND r.date LIKE ? AND r.date <= ? AND r.${inVis} GROUP BY k.id, r.metric ORDER BY k.name`,
+      p.clientId, `${month}-%`, through, ...vis,
+    ),
+    one<{ body: string; updated_at: string }>(c.env.DB, `SELECT body, updated_at FROM ad_report_notes WHERE client_id = ? AND month = ? AND body <> ''`, p.clientId, month),
+  ])
+  return c.json({ publishedThrough: through, goals: goals.map((g) => ({ goal: g.goal, isPrimary: Boolean(g.is_primary) })), months, month, comparedDays: lastDay < 31 ? lastDay : null, totals, previous, daily, campaigns, note })
 })
 
 portal.get('/projects/:id', async (c) => {

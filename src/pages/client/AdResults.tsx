@@ -8,7 +8,7 @@ import { AD_GOALS, AD_GOAL_LABEL, AD_GOAL_METRIC, AD_METRICS, AD_METRIC_LABEL, t
 import { api, ApiError } from '@/lib/api'
 import { useAction } from '@/lib/forms'
 import { fmtDate, todayIST } from '@/lib/format'
-import { Badge, Button, Checkbox, Dialog, EmptyState, ErrorState, Field, Input, Panel, Section, Select, SkeletonRows, StatStrip, Table, Td, Th, Tr } from '@/components/ui'
+import { Badge, Button, Checkbox, Dialog, Textarea, EmptyState, ErrorState, Field, Input, Panel, Section, Select, SkeletonRows, StatStrip, Table, Td, Th, Tr } from '@/components/ui'
 
 interface AdData {
   goals: { goal: AdGoal; isPrimary: boolean }[]
@@ -16,6 +16,7 @@ interface AdData {
   campaigns: { id: string; ad_account_id: string; name: string }[]
   results: { campaign_id: string; date: string; metric: AdMetric; value: number; source: string }[]
   publishedThrough: string | null
+  note: { body: string; updated_at: string } | null
 }
 
 const fmtNum = (n: number) => n.toLocaleString('en-IN', { maximumFractionDigits: 2 })
@@ -201,11 +202,23 @@ function CsvDialog({ clientId, data, open, onClose }: { clientId: string; data: 
   )
 }
 
+function NotePanel({ clientId, month, initial, canManage }: { clientId: string; month: string; initial: string; canManage: boolean }) {
+  const [body, setBody] = useState(initial)
+  const save = useAction(() => api.put(`/api/ads/clients/${clientId}/notes/${month}`, { body }), { success: 'Note saved', invalidate: [['ads', clientId]] })
+  return (
+    <Panel className="p-4">
+      <div className="eyebrow mb-2">Note to the client for this month</div>
+      <Textarea rows={4} value={body} disabled={!canManage} placeholder="What we did this month and what comes next. Shown in the client portal." onChange={(e) => setBody(e.target.value)} />
+      {canManage && <Button size="sm" className="mt-2" loading={save.isPending} disabled={body === initial} onClick={() => save.mutate()}>Save note</Button>}
+    </Panel>
+  )
+}
+
 export default function AdResults({ clientId, canManage }: { clientId: string; canManage: boolean }) {
   const [month, setMonth] = useState(todayIST().slice(0, 7))
   const from = monthStart(`${month}-01`)
   const to = monthEnd(from)
-  const q = useQuery({ queryKey: ['ads', clientId, month], queryFn: () => api.get<AdData>(`/api/ads/clients/${clientId}?from=${from}&to=${to}`) })
+  const q = useQuery({ queryKey: ['ads', clientId, month], queryFn: () => api.get<AdData>(`/api/ads/clients/${clientId}?from=${from}&to=${to}&month=${month}`) })
   const [entering, setEntering] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [through, setThrough] = useState('')
@@ -274,6 +287,7 @@ export default function AdResults({ clientId, canManage }: { clientId: string; c
           )}
           {canManage && d.publishedThrough && <Button size="sm" variant="ghost" className="mt-2" onClick={() => publish.mutate(null)}>Hide from client</Button>}
         </Panel>
+        <NotePanel key={`${month}:${d.note?.updated_at ?? ''}`} clientId={clientId} month={month} initial={d.note?.body ?? ''} canManage={canManage} />
         <GoalsPanel key={d.goals.map((g) => g.goal).join()} clientId={clientId} data={d} canManage={canManage} />
         <AccountsPanel clientId={clientId} data={d} canManage={canManage} />
       </aside>

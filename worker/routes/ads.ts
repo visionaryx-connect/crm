@@ -2,7 +2,7 @@
 // Spend is visible here (staff only). The client portal must read through CLIENT_VISIBLE_AD_METRICS instead.
 import { Hono } from 'hono'
 import type { AppBindings } from '../env'
-import { adAccountSchema, adCampaignSchema, adGoalsSchema, adPublishSchema, adResultsSchema, dateStr } from '@shared/schemas'
+import { adAccountSchema, adCampaignSchema, adGoalsSchema, adMonth, adNoteSchema, adPublishSchema, adResultsSchema, dateStr } from '@shared/schemas'
 import { activity } from '../lib/audit'
 import { newId } from '../lib/crypto'
 import { many, nowIso, one, placeholders } from '../lib/db'
@@ -35,7 +35,9 @@ ads.get('/clients/:clientId', async (c) => {
   const params: unknown[] = [clientId]
   if (from) { where.push('r.date >= ?'); params.push(from) }
   if (to) { where.push('r.date <= ?'); params.push(to) }
-  const [goals, accounts, campaigns, results] = await Promise.all([
+  const month = query(c, 'month')
+  if (month) validate(adMonth, month)
+  const [goals, accounts, campaigns, results, note] = await Promise.all([
     many<{ goal: string; is_primary: number }>(c.env.DB, 'SELECT goal, is_primary FROM client_ad_goals WHERE client_id = ? ORDER BY is_primary DESC, goal', clientId),
     many(c.env.DB, 'SELECT id, platform, external_id, name, created_at FROM ad_accounts WHERE client_id = ? AND archived_at IS NULL ORDER BY name', clientId),
     many(
@@ -50,8 +52,10 @@ ads.get('/clients/:clientId', async (c) => {
         WHERE ${where.join(' AND ')} ORDER BY r.date, r.campaign_id, r.metric LIMIT 20000`,
       ...params,
     ),
+    month ? one<{ body: string; updated_at: string }>(c.env.DB, 'SELECT body, updated_at FROM ad_report_notes WHERE client_id = ? AND month = ?', clientId, month) : null,
   ])
   return c.json({
+    note: note ?? null,
     goals: goals.map((g) => ({ goal: g.goal, isPrimary: Boolean(g.is_primary) })),
     accounts,
     campaigns,
@@ -141,6 +145,22 @@ ads.put('/clients/:clientId/results', requirePermission('clients.manage'), async
     }),
   ])
   return c.json({ saved: input.rows.length })
+})
+
+ads.put('/clients/:clientId/notes/:month', requirePermission('clients.manage'), async (c) => {
+  const a = c.get('auth')
+  const clientId = c.req.param('clientId')
+  const month = validate(adMonth, c.req.param('month'))
+  const client = await assertClient(c.env.DB, a, clientId)
+  const { body: text } = await body(c, adNoteSchema)
+  await c.env.DB.batch([
+    c.env.DB.prepare(
+      `INSERT INTO ad_report_notes (client_id, month, body, updated_by, updated_at) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT (client_id, month) DO UPDATE SET body = excluded.body, updated_by = excluded.updated_by, updated_at = excluded.updated_at`,
+    ).bind(clientId, month, text, a.userId, nowIso()),
+    activity(c.env.DB, { actorId: a.userId, action: 'client.ad_note_saved', entityType: 'client', entityId: clientId, summary: `Updated the ${month} ad note for ${client.name}`, ip: clientIp(c) }),
+  ])
+  return c.json({ ok: true })
 })
 
 /** Make results up to and including `through` visible in the client portal (null hides everything). */

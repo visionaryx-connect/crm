@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, Route, Routes, useParams } from 'react-router'
+import { Link, NavLink, Route, Routes, useParams } from 'react-router'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { CheckCircle2, Download, FileText, LogOut, Mail, MessageSquarePlus, Phone, ShieldCheck } from 'lucide-react'
 import { PROJECT_STATUS_LABEL, type ProjectStatus } from '@shared/constants'
@@ -8,9 +8,11 @@ import { RealtimeProvider } from '@/lib/realtime'
 import { bytes, fmtDate, fmtDateTime, relative } from '@/lib/format'
 import { Badge, BrandLockup, BrandMark, Button, Dialog, EmptyState, ErrorState, Field, Input, Panel, Section, Select, SkeletonRows, Tabs, Textarea, cx } from '@/components/ui'
 import { useToast } from '@/components/toast'
+import CampaignPerformance from './CampaignPerformance'
 
 interface PortalMe {
   client: { name: string; reference: string }
+  hasAdResults: boolean
   projects: { id: string; reference: string; name: string; status: ProjectStatus; progress: number; target_date: string | null; client_status_note: string; manager_name: string | null; manager_email: string | null }[]
   support: { company: string; email: string | null; phone: string | null; website: string }
   csrfToken: string
@@ -43,6 +45,13 @@ function PortalShell({ me, children }: { me: PortalMe; children: React.ReactNode
           <span className="hidden text-[12.5px] text-muted sm:inline">· Client portal for {me.client.name}</span>
           <button onClick={logout} className="ml-auto inline-flex items-center gap-1.5 text-[12.5px] text-ink-2 hover:text-ink"><LogOut className="size-3.5" /> Sign out</button>
         </div>
+        {me.hasAdResults && (
+          <nav className="mx-auto flex max-w-5xl gap-5 px-4 text-[13px] md:px-6">
+            {[{ to: '/portal', label: 'Projects', end: true }, { to: '/portal/performance', label: 'Campaign performance', end: false }].map((n) => (
+              <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => cx('-mb-px border-b-2 py-2.5', isActive ? 'border-ink text-ink' : 'border-transparent text-muted hover:text-ink')}>{n.label}</NavLink>
+            ))}
+          </nav>
+        )}
       </header>
       <main className="mx-auto max-w-5xl px-4 py-8 md:px-6">{children}</main>
       <footer className="mx-auto max-w-5xl px-4 pb-10 text-[12px] text-muted md:px-6">
@@ -315,6 +324,7 @@ export default function PortalApp() {
         <Routes>
           <Route index element={<Overview me={q.data} />} />
           <Route path="projects/:id" element={<ProjectRoute me={q.data} />} />
+          {q.data.hasAdResults && <Route path="performance" element={<CampaignPerformance />} />}
           <Route path="*" element={<Overview me={q.data} />} />
         </Routes>
       </PortalShell>

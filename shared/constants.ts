@@ -96,3 +96,47 @@ export interface RealtimeEnvelope {
   at: string
   data: Record<string, unknown>
 }
+
+// ---- Client ad results (Meta) ----
+export const AD_GOALS = ['website_visits', 'followers', 'calls', 'leads'] as const
+export type AdGoal = (typeof AD_GOALS)[number]
+export const AD_GOAL_LABEL: Record<AdGoal, string> = {
+  website_visits: 'Website visits',
+  followers: 'Followers',
+  calls: 'Calls',
+  leads: 'Leads',
+}
+
+export const AD_METRICS = [
+  'impressions', 'reach', 'link_clicks', 'landing_page_views', 'follows', 'profile_visits', 'call_taps', 'calls', 'leads', 'spend',
+] as const
+export type AdMetric = (typeof AD_METRICS)[number]
+
+/**
+ * The only metrics the client portal may return. Spend and anything derived from it (CPL, CPC, CPM, ROAS)
+ * are deliberately absent: clients must not be able to work out the ad budget.
+ */
+export const CLIENT_VISIBLE_AD_METRICS = [
+  'impressions', 'reach', 'link_clicks', 'landing_page_views', 'follows', 'profile_visits', 'call_taps', 'calls', 'leads',
+] as const satisfies readonly AdMetric[]
+
+export const AD_METRIC_LABEL: Record<AdMetric, { label: string; help: string }> = {
+  impressions: { label: 'Impressions', help: 'How many times your ads were shown.' },
+  reach: { label: 'People reached', help: 'How many different people saw your ads.' },
+  link_clicks: { label: 'Link clicks', help: 'Clicks on the ad that lead to your website.' },
+  landing_page_views: { label: 'Website visits', help: 'People who clicked and whose page fully loaded.' },
+  follows: { label: 'New followers', help: 'People who followed your Page or Instagram from the ads.' },
+  profile_visits: { label: 'Profile visits', help: 'Visits to your Facebook Page or Instagram profile.' },
+  call_taps: { label: 'Call button taps', help: 'People who tapped "Call" on an ad.' },
+  calls: { label: 'Calls received', help: 'Real calls recorded by a call-tracking number.' },
+  leads: { label: 'Leads', help: 'Enquiries submitted through the ads.' },
+  spend: { label: 'Spend (internal)', help: 'Amount charged by Meta. Never shown to clients.' },
+}
+
+/** The headline metric for each goal. */
+export const AD_GOAL_METRIC: Record<AdGoal, AdMetric> = {
+  website_visits: 'landing_page_views',
+  followers: 'follows',
+  calls: 'call_taps',
+  leads: 'leads',
+}

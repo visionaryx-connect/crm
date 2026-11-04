@@ -10,6 +10,7 @@ import { Badge, Button, Checkbox, ConfirmDialog, Dialog, EmptyState, ErrorState,
 import { ProgressFigure, ProjectStatusBadge } from '@/components/status'
 import { useToast } from '@/components/toast'
 import { ClientDialog, ClientStatusBadge } from './Clients'
+import AdResults from './client/AdResults'
 
 interface Contact { id: string; name: string; title: string | null; email: string | null; phone: string | null; is_primary: number; notes: string }
 interface ClientData {
@@ -24,7 +25,7 @@ interface ClientData {
   can: { manage: boolean; portal: boolean }
 }
 
-type Tab = 'overview' | 'contacts' | 'history' | 'portal'
+type Tab = 'overview' | 'contacts' | 'history' | 'ads' | 'portal'
 
 function ContactDialog({ clientId, contact, open, onClose }: { clientId: string; contact?: Contact | null; open: boolean; onClose: () => void }) {
   const [v, setV] = useState({ name: contact?.name ?? '', title: contact?.title ?? '', email: contact?.email ?? '', phone: contact?.phone ?? '', isPrimary: Boolean(contact?.is_primary), notes: contact?.notes ?? '' })
@@ -150,6 +151,7 @@ export default function ClientDetail() {
             { value: 'overview', label: 'Overview' },
             { value: 'contacts', label: 'Contacts', count: d.contacts.length },
             { value: 'history', label: 'Relationship history', count: d.interactions.length },
+            { value: 'ads', label: 'Ad results' },
             ...(d.can.portal ? [{ value: 'portal' as Tab, label: 'Portal access', count: d.portalLinks?.filter((l) => !l.revoked_at && Date.parse(l.expires_at) > Date.now()).length }] : []),
           ]} />
         </div>
@@ -241,6 +243,8 @@ export default function ClientDetail() {
           )}
         </Section>
       )}
+
+      {tab === 'ads' && <AdResults clientId={c.id} canManage={d.can.manage} />}
 
       {tab === 'portal' && d.portalLinks && (
         <Section title="Client portal access" description="Passwordless, revocable links scoped to this client. Only approved updates, client-visible milestones and shared deliverables are visible." actions={!c.archived_at && <Button size="sm" variant="primary" icon={<KeyRound className="size-3.5" />} onClick={() => setLinkOpen(true)}>Create link</Button>}>

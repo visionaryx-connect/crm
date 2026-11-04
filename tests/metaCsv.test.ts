@@ -1,3 +1,4 @@
+import tamilPeriodCsv from './fixtures/meta-tamil-period.csv?raw'
 import { describe, expect, it } from 'vitest'
 import { normDate, parseCsv, parseMetaCsv } from '../shared/metaCsv'
 
@@ -38,5 +39,26 @@ describe('Meta CSV import', () => {
     const r = parseMetaCsv('Campaign name,Impressions\nA,10')
     expect(r.rows).toHaveLength(0)
     expect(r.warnings[0]).toMatch(/Day/)
+  })
+})
+
+describe('Meta CSV import: Tamil, whole-period export', () => {
+  const r = parseMetaCsv(tamilPeriodCsv)
+  const get = (c: string, m: string) => r.rows.find((x) => x.campaign === c && x.metric === m)?.value
+
+  it('reads ad names and stores totals on the period end date', () => {
+    expect(r.mode).toBe('period')
+    expect(r.campaigns).toHaveLength(6)
+    expect(r.rows.every((x) => x.date === '2026-11-02')).toBe(true)
+    expect(r.warnings.join(' ')).toMatch(/no Day breakdown/)
+  })
+
+  it('maps Tamil columns and the result indicator without double counting', () => {
+    expect(get('demo', 'impressions')).toBe(9989)
+    expect(get('demo', 'reach')).toBe(7177)
+    expect(get('demo', 'call_taps')).toBe(19)
+    expect(get('demo', 'spend')).toBe(200)
+    expect(get('புதிய Awareness விளம்பரம்', 'reach')).toBe(153040)
+    expect(get('demo 4', 'call_taps')).toBeUndefined()
   })
 })
